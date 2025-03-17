@@ -13,12 +13,14 @@ namespace Reposetory.Entities
         [Key]
         public int Id { get; set; } // מפתח ראשי
 
-        [ForeignKey("Calls")]
-        public int EmergencyCallId { get; set; } // מפתח זר לקריאה
-        public Calls EmergencyCall { get; set; }
+        
+        public int CallsId { get; set; } // מפתח זר לקריאה
+        [ForeignKey("CallsId")]
+        public Calls calls { get; set; }
 
-        [ForeignKey("Volunteers")]
+       
         public int VolunteerId { get; set; } // מפתח זר למתנדב
+        [ForeignKey("VolunteerId")]
         public Volunteers Volunteer { get; set; }
     }
 

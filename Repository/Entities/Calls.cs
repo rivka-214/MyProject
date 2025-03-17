@@ -28,7 +28,7 @@ namespace Reposetory.Entities
 
         public string Description { get; set; } // תיאור
 
-        [Required]
+       
         public int UrgencyLevel { get; set; } // רמת דחיפות
 
         public string Status { get; set; } // סטטוס הקריאה

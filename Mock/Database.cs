@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Repository.Entities;
-using Repository.Interfaces;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,20 +8,20 @@ using System.Threading.Tasks;
 
 namespace Mock
 {
-    public class Database:DbContext ,IContext
+    public class Database/*:*//*DbContext ,IContext*/
     {
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Category> Categories { get; set; }
-        public DbSet<User> Users { get; set; }
+        //public DbSet<Product> Products { get; set; }
+        //public DbSet<Category> Categories { get; set; }
+        //public DbSet<User> Users { get; set; }
 
-        public void Save()
-        {
-           SaveChanges();
-        }
+        //public void Save()
+        //{
+        //   SaveChanges();
+        //}
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer("server=sql;database=projectShopDb;trusted_connection=true;TrustServerCertificate=True");
-        }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseSqlServer("server=sql;database=projectShopDb;trusted_connection=true;TrustServerCertificate=True");
+        //}
     }
 }
