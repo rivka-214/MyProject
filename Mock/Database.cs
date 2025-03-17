@@ -1,27 +1,22 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using Reposetory.Entities;
 
 namespace Mock
 {
-    public class Database/*:*//*DbContext ,IContext*/
+    public class Database : DbContext
     {
-        //public DbSet<Product> Products { get; set; }
-        //public DbSet<Category> Categories { get; set; }
-        //public DbSet<User> Users { get; set; }
+        public DbSet<Calls> ProductsTbl { get; set; }
+        public DbSet<Volunteers> VolunteersTbl { get; set; }
+        public DbSet<VolunteerCalls> VolunteerCallsTbl { get; set; }
 
-        //public void Save()
-        //{
-        //   SaveChanges();
-        //}
+        public void Save()
+        {
+            SaveChanges();
+        }
 
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    optionsBuilder.UseSqlServer("server=sql;database=projectShopDb;trusted_connection=true;TrustServerCertificate=True");
-        //}
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer("server=r=(localdb)\\MSSQLLocalDB;database=project;trusted_connection=true;TrustServerCertificate=True");
+        }
     }
 }
