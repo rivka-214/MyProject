@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace Mock
 {
-    public class Database :DbContext ,IContext
+    public class Database :DbContext 
     {
-        public DbSet<Calls> Products { get; set; }
-        public DbSet<> Categories { get; set; }
-        public DbSet<User> Users { get; set; }
+        public DbSet<Calls> CallsTbl { get; set; }
+        public DbSet<Volunteers> VolunteersTbl { get; set; }
+        public DbSet<VolunteerCalls> VolunteerCallsTbl { get; set; }
 
         public void Save()
         {
