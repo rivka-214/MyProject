@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Reposetory.Entities;
+using Repository.Interfacese;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace Mock
 {
-    public class Database :DbContext 
+    public class Database :DbContext,IContext 
     {
-        public DbSet<Calls> CallsTbl { get; set; }
-        public DbSet<Volunteers> VolunteersTbl { get; set; }
-        public DbSet<VolunteerCalls> VolunteerCallsTbl { get; set; }
+        public DbSet<Calls> Calls { get ; set; }
+        public DbSet<Volunteers> Volunteers { get; set ; }
+        public DbSet<VolunteerCalls> VolunteerCalls { get ; set ; }
 
         public void Save()
         {
