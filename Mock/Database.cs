@@ -13,7 +13,7 @@ namespace Mock
     public class Database :DbContext ,IContext
     {
         public DbSet<Calls> Products { get; set; }
-        public DbSet<ValueTa> Categories { get; set; }
+        public DbSet<> Categories { get; set; }
         public DbSet<User> Users { get; set; }
 
         public void Save()
