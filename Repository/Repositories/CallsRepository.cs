@@ -40,7 +40,7 @@ namespace Repository.Repositories
 
         public void UpdateItem(int id, Calls item)
         {
-           var call=GetById(id);//??
+           var call=GetById(id);
             call.Status=item.Status;
             context.Save();
             
