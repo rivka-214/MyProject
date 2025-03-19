@@ -16,7 +16,7 @@ namespace Reposetory.Entities
         
         public int CallsId { get; set; } // מפתח זר לקריאה
         [ForeignKey("CallsId")]
-        public Calls calls { get; set; }
+        public Volunteers calls { get; set; }
 
        
         public int VolunteerId { get; set; } // מפתח זר למתנדב

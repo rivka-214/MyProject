@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace Repository.Repositories
 {
-    public class CallsRepository : IRepository<Calls>
+    public class CallsRepository : IRepository<Volunteers>
     {
         private readonly IContext context;
         public CallsRepository(IContext context)
         {
             this.context = context;
         }
-        public Calls AddItem(Calls item)
+        public Volunteers AddItem(Volunteers item)
         {
           this.context.Calls.Add(item);
             this.context.Save();
@@ -28,17 +28,17 @@ namespace Repository.Repositories
             this.context.Save();
         }
 
-        public List<Calls> GetAll()
+        public List<Volunteers> GetAll()
         {
           return this.context.Calls.ToList();
         }
 
-        public Calls GetById(int id)
+        public Volunteers GetById(int id)
         {
             return context.Calls.FirstOrDefault(x => x.Id == id);
         }
 
-        public void UpdateItem(int id, Calls item)
+        public void UpdateItem(int id, Volunteers item)
         {
            var call=GetById(id);
             call.Status=item.Status;

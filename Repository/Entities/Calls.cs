@@ -10,7 +10,7 @@ namespace Reposetory.Entities
 {
 
 
-    public class Calls
+    public class Volunteers
     {
         [Key]
         public int Id { get; set; } // מפתח ראשי
