@@ -8,21 +8,31 @@ using System.Threading.Tasks;
 
 namespace Reposetory.Entities
 {
+
     public class VolunteerCalls
+
     {
+
         [Key]
-        public int Id { get; set; } // מפתח ראשי
 
-        
-        public int CallsId { get; set; } // מפתח זר לקריאה
+        public int Id { get; set; } // Primary key
+
+
+        public int CallsId { get; set; } // Foreign key for calls
+
         [ForeignKey("CallsId")]
-        public Volunteers calls { get; set; }
 
-       
-        public int VolunteerId { get; set; } // מפתח זר למתנדב
+        public virtual Calls Calls { get; set; } // Change Volunteers to Calls if Calls is the entity
+
+
+        public int VolunteerId { get; set; } // Foreign key for volunteer
+
         [ForeignKey("VolunteerId")]
-        public Volunteers Volunteer { get; set; }
+
+        public virtual Volunteers Volunteer { get; set; }
+
     }
+
 
 }
 

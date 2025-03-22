@@ -21,55 +21,45 @@ namespace Mock.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Repository.Entities.Category", b =>
+            modelBuilder.Entity("Reposetory.Entities.Calls", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("Repository.Entities.Product", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Price")
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("LocationX")
+                        .HasColumnType("float");
+
+                    b.Property<double>("LocationY")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Region")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UrgencyLevel")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("Products");
+                    b.ToTable("CallsDb");
                 });
 
-            modelBuilder.Entity("Repository.Entities.User", b =>
+            modelBuilder.Entity("Reposetory.Entities.VolunteerCalls", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -77,15 +67,37 @@ namespace Mock.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Mail")
+                    b.Property<int>("CallsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VolunteerId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CallsId");
+
+                    b.HasIndex("VolunteerId");
+
+                    b.ToTable("VolunteerCallsDb");
+                });
+
+            modelBuilder.Entity("Reposetory.Entities.Volunteers", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsManager")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -95,23 +107,36 @@ namespace Mock.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("VolunteersDb");
                 });
 
-            modelBuilder.Entity("Repository.Entities.Product", b =>
+            modelBuilder.Entity("Reposetory.Entities.VolunteerCalls", b =>
                 {
-                    b.HasOne("Repository.Entities.Category", "Category")
-                        .WithMany("Products")
-                        .HasForeignKey("CategoryId")
+                    b.HasOne("Reposetory.Entities.Calls", "Calls")
+                        .WithMany("VolunteerCalls")
+                        .HasForeignKey("CallsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Category");
+                    b.HasOne("Reposetory.Entities.Volunteers", "Volunteer")
+                        .WithMany("VolunteerCalls")
+                        .HasForeignKey("VolunteerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Calls");
+
+                    b.Navigation("Volunteer");
                 });
 
-            modelBuilder.Entity("Repository.Entities.Category", b =>
+            modelBuilder.Entity("Reposetory.Entities.Calls", b =>
                 {
-                    b.Navigation("Products");
+                    b.Navigation("VolunteerCalls");
+                });
+
+            modelBuilder.Entity("Reposetory.Entities.Volunteers", b =>
+                {
+                    b.Navigation("VolunteerCalls");
                 });
 #pragma warning restore 612, 618
         }
