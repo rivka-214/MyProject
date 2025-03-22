@@ -4,11 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Reposetory.Entities.Volunteers;
 
-namespace Reposetory.Entities
+namespace Common.Dto
 {
-    public class Volunteers
+    public class VolunteersDto
     {
         [Key]
         public int Id { get; set; } // מפתח ראשי
@@ -23,6 +22,6 @@ namespace Reposetory.Entities
 
         public bool IsManager { get; set; } // האם מתנדב הוא מנהל
 
-        public List<VolunteerCalls> VolunteerCalls { get; set; } = new List<VolunteerCalls>();
+      
     }
 }

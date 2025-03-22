@@ -28,7 +28,7 @@ namespace Common.Dto
 
         public int UrgencyLevel { get; set; } // רמת דחיפות
 
-        public string Status { get; set; } // סטטוס הקריאה
+        public  string Status { get; set; } // סטטוס הקריאה
 
         public List<VolunteerCallsDto> VolunteerCalls { get; set; } = new List<VolunteerCallsDto>();
     }

@@ -13,16 +13,16 @@ namespace Service.Services
 {
     public class CallService : IService<CallsDto>
     {
-        private readonly IRepository<Calls> repository;
+        private readonly IRepository<Volunteers> repository;
         private readonly IMapper mapper;
-        public CallService(IRepository<Calls> repository,IMapper mapper)
+        public CallService(IRepository<Volunteers> repository,IMapper mapper)
         {
             this.repository = repository;
             this.mapper = mapper;
         }
         public CallsDto AddItem(CallsDto item)
         {
-          return mapper.Map<Calls,CallsDto>(repository.AddItem(mapper.Map<CallsDto,Calls>(item )));
+          return mapper.Map<Volunteers,CallsDto>(repository.AddItem(mapper.Map<CallsDto,Volunteers>(item )));
          
         }
 
@@ -33,17 +33,17 @@ namespace Service.Services
 
         public List<CallsDto> GetAll()
         {
-            return mapper.Map<List<Calls>,List<CallsDto>>(repository.GetAll());
+            return mapper.Map<List<Volunteers>,List<CallsDto>>(repository.GetAll());
         }
 
         public CallsDto GetById(int id)
         {
-            return mapper.Map<Calls, CallsDto>(repository.GetById(id));
+            return mapper.Map<Volunteers, CallsDto>(repository.GetById(id));
         }
 
         public void UpdateItem(int id, CallsDto item)
         {
-             repository.UpdateItem(id, mapper.Map<CallsDto, Calls>(item));
+             repository.UpdateItem(id, mapper.Map<CallsDto, Volunteers>(item));
         }
     }
 }
