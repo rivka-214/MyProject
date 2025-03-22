@@ -18,34 +18,33 @@ namespace Repository.Repositories
 
         public Calls AddItem(Calls item)
         {
-            throw new NotImplementedException();
-        }
-
-        public Volunteers AddItem(Volunteers volunteers)
-        {
-            throw new NotImplementedException();
+            this.context.CallsDb.Add(item);
+            this.context.Save();
+            return item;
         }
 
         public void DeleteItem(int id)
         {
-            throw new NotImplementedException();
+            this.context.CallsDb.Remove(GetById(id));
+            this.context.Save();
         }
 
         public List<Calls> GetAll()
         {
-            throw new NotImplementedException();
+            return this.context.CallsDb.ToList();
         }
 
         public Calls GetById(int id)
         {
-            throw new NotImplementedException();
+            return context.CallsDb.FirstOrDefault(x => x.Id == id);
+
         }
 
         public void UpdateItem(int id, Calls item)
         {
-            throw new NotImplementedException();
+            var Volunteer = GetById(id);
+            Volunteer.LocationX = item.LocationX;
+            context.Save();
         }
-
-       
     }
 }

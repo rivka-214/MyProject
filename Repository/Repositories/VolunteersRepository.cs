@@ -18,24 +18,24 @@ namespace Repository.Repositories
 
         public Volunteers AddItem(Volunteers item)
         {
-            this.context.Volunteers.Add(item);
+            this.context.VolunteersDb.Add(item);
             this.context.Save();
             return item;
         }
         public void DeleteItem(int id)
         {
-            this.context.Volunteers.Remove(GetById(id));
+            this.context.VolunteersDb.Remove(GetById(id));
             this.context.Save();
         }
 
         public List<Volunteers> GetAll()
         {
-            return this.context.Volunteers.ToList();
+            return this.context.VolunteersDb.ToList();
         }
 
         public Volunteers GetById(int id)
         {
-            return context.Volunteers.FirstOrDefault(x => x.Id == id);
+            return context.VolunteersDb.FirstOrDefault(x => x.Id == id);
         }
 
         public void UpdateItem(int id, Volunteers item)

@@ -11,9 +11,9 @@ namespace Repository.Interfacese
 {
     public interface IContext
     {
-        public DbSet<Volunteers> Calls { get; set; }
-        public DbSet<Volunteers> Volunteers { get; set; }
-        public DbSet<VolunteerCalls> VolunteerCalls { get; set; }
+        public DbSet<Calls> CallsDb { get; set; }
+        public DbSet<Volunteers> VolunteersDb { get; set; }
+        public DbSet<VolunteerCalls> VolunteerCallsDb { get; set; }
         public void Save();
     }
 }
