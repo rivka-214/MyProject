@@ -15,6 +15,9 @@ namespace Repository.Repositories
         {
             this.context = context;
         }
+   
+    
+
         public VolunteerCalls AddItem(VolunteerCalls item)
         {
 
@@ -22,6 +25,7 @@ namespace Repository.Repositories
             this.context.Save();
             return item;
         }
+
 
         public void DeleteItem(int id)
         {
@@ -46,17 +50,5 @@ namespace Repository.Repositories
             VolunteerCall.Id= item.Id;
             context.Save();
         }
-
-
-
-     
-    
-
-       
-
-       
-
-       
-
     }
 }

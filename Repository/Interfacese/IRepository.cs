@@ -14,7 +14,6 @@ namespace Repository.Interfacese
         T AddItem(T item);
         void DeleteItem(int id);
         void UpdateItem(int id,T item);
-        Volunteers AddItem(Volunteers volunteers);
-        void UpdateItem(int id, Volunteers volunteers);
+
     }
 }

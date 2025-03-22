@@ -8,42 +8,44 @@ using System.Threading.Tasks;
 
 namespace Repository.Repositories
 {
-    public class CallsRepository : IRepository<Volunteers>
+    public class CallsRepository : IRepository<Calls>
     {
         private readonly IContext context;
         public CallsRepository(IContext context)
         {
             this.context = context;
         }
-        public Volunteers AddItem(Volunteers item)
+
+        public Calls AddItem(Calls item)
         {
-          this.context.Calls.Add(item);
-            this.context.Save();
-            return item;
+            throw new NotImplementedException();
+        }
+
+        public Volunteers AddItem(Volunteers volunteers)
+        {
+            throw new NotImplementedException();
         }
 
         public void DeleteItem(int id)
         {
-           this.context.Calls.Remove(GetById(id));
-            this.context.Save();
+            throw new NotImplementedException();
         }
 
-        public List<Volunteers> GetAll()
+        public List<Calls> GetAll()
         {
-          return this.context.Calls.ToList();
+            throw new NotImplementedException();
         }
 
-        public Volunteers GetById(int id)
+        public Calls GetById(int id)
         {
-            return context.Calls.FirstOrDefault(x => x.Id == id);
+            throw new NotImplementedException();
         }
 
-        public void UpdateItem(int id, Volunteers item)
+        public void UpdateItem(int id, Calls item)
         {
-           var call=GetById(id);
-            call.Status=item.Status;
-            context.Save();
-            
+            throw new NotImplementedException();
         }
+
+       
     }
 }
