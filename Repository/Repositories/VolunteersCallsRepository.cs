@@ -21,7 +21,7 @@ namespace Repository.Repositories
         public VolunteerCalls AddItem(VolunteerCalls item)
         {
 
-            this.context.VolunteerCalls.Add(item);
+            this.context.VolunteerCallsDb.Add(item);
             this.context.Save();
             return item;
         }
@@ -29,19 +29,19 @@ namespace Repository.Repositories
 
         public void DeleteItem(int id)
         {
-            this.context.VolunteerCalls.Remove(GetById(id));
+            this.context.VolunteerCallsDb.Remove(GetById(id));
             this.context.Save();
         }
 
         public List<VolunteerCalls> GetAll()
         {
 
-            return this.context.VolunteerCalls.ToList();
+            return this.context.VolunteerCallsDb.ToList();
         }
 
         public VolunteerCalls GetById(int id)
         {
-            return context.VolunteerCalls.FirstOrDefault(x => x.Id == id); 
+            return context.VolunteerCallsDb.FirstOrDefault(x => x.Id == id); 
         }
 
         public void UpdateItem(int id, VolunteerCalls item)
