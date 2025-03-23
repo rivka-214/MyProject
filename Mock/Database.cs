@@ -30,7 +30,7 @@ namespace Mock
 
            // optionsBuilder.UseSqlServer("server=(localdb)\\MSSQLLocalDB;database=projectShopDb;trusted_connection=true;TrustServerCertificate=True");
 
-            optionsBuilder.UseSqlServer("server=.;database=projectCalls;trusted_connection=true;TrustServerCertificate=True");
+            optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS01;Database=CitizenShield;Trusted_Connection=True;TrustServerCertificate=True;\r\n");
 
         }
     }

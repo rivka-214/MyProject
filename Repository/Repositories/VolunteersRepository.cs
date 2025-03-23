@@ -42,6 +42,10 @@ namespace Repository.Repositories
         {
             var Volunteer = GetById(id);
             Volunteer.FullName = item.FullName;
+            Volunteer.PhoneNumber = item.PhoneNumber;
+              Volunteer.PhoneNumber = item.PhoneNumber;
+            Volunteer.Role = item.Role;
+
             context.Save();
         }
 

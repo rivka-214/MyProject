@@ -12,28 +12,29 @@ namespace Reposetory.Entities
 
     public class Calls
     {
-        [Key]
-        public int Id { get; set; } // מפתח ראשי
-
-        [Required]
-        public string Region { get; set; } // אזור
-
-        [Required]
-        public double LocationX { get; set; } // קואורדינטה X
-
-        [Required]
-        public double LocationY { get; set; } // קואורדינטה Y
-
-        public string ImageUrl { get; set; } // תמונה
-
-        public string Description { get; set; } // תיאור
-
-       
-        public int UrgencyLevel { get; set; } // רמת דחיפות
-
-        public string Status { get; set; } // סטטוס הקריאה
-
-        public List<VolunteerCalls> VolunteerCalls { get; set; } = new List<VolunteerCalls>();
+        public int Id { get; set; }
+        public string Region { get; set; }
+        public double LocationX { get; set; }
+        public double LocationY { get; set; }
+        public string ImageUrl { get; set; }
+        public string Description { get; set; }
+        public int UrgencyLevel { get; set; }
+        public string Status { get; set; }
+        public string InjuryType { get; set; }
+        public int SeverityLevel { get; set; }
+        public DateTime CallDateTime { get; set; }
+      
     }
 
+    //public class FirstAidInstructions
+    //{
+    //    [Key]
+    //    public int Id { get; set; }
+
+    //    [Required]
+    //    public string InjuryType { get; set; }
+
+    //    [Required]
+    //    public string InstructionText { get; set; }
+    //}
 }
