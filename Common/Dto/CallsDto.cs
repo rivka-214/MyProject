@@ -1,7 +1,8 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,7 +22,8 @@ namespace Common.Dto
         [Required]
         public double LocationY { get; set; } // קואורדינטה Y
 
-        public byte[] ArrImage { get; set; } // תמונה
+        public byte[]? ArrImage { get; set; } // תמונה
+        public IFormFile? FileImage { get; set; }//
 
         public string Description { get; set; } // תיאור
 
