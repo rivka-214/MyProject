@@ -13,10 +13,10 @@ namespace Reposetory.Entities
         [Key]
         public int Id { get; set; } // מפתח ראשי
 
-        [Required]
+     
         public string FullName { get; set; } // שם מלא
 
-        [Required]
+     
         public string PhoneNumber { get; set; } // מספר טלפון
 
         public string Role { get; set; } // תפקיד (חובש, מגיש עזרה ראשונה וכו')

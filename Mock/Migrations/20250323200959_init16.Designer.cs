@@ -11,8 +11,8 @@ using Mock;
 namespace Mock.Migrations
 {
     [DbContext(typeof(Database))]
-    [Migration("20250322225755_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20250323200959_init16")]
+    partial class init16
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -116,7 +116,7 @@ namespace Mock.Migrations
             modelBuilder.Entity("Reposetory.Entities.VolunteerCalls", b =>
                 {
                     b.HasOne("Reposetory.Entities.Calls", "Calls")
-                        .WithMany("VolunteerCalls")
+                        .WithMany()
                         .HasForeignKey("CallsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -130,11 +130,6 @@ namespace Mock.Migrations
                     b.Navigation("Calls");
 
                     b.Navigation("Volunteer");
-                });
-
-            modelBuilder.Entity("Reposetory.Entities.Calls", b =>
-                {
-                    b.Navigation("VolunteerCalls");
                 });
 
             modelBuilder.Entity("Reposetory.Entities.Volunteers", b =>

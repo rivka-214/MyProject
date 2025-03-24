@@ -46,9 +46,7 @@ namespace Repository.Repositories
 
         public void UpdateItem(int id, VolunteerCalls item)
         {
-            var VolunteerCall = GetById(id);
-            VolunteerCall.Id= item.Id;
-            context.Save();
+          
         }
     }
 }
