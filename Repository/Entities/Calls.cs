@@ -20,10 +20,11 @@ namespace Reposetory.Entities
         public string? Description { get; set; }
         public int? UrgencyLevel { get; set; }
         public string? Status { get; set; }
+        public List<VolunteerCalls> VolunteerCalls { get; set; } = new List<VolunteerCalls>();
         //public string InjuryType { get; set; }
         //public int SeverityLevel { get; set; }
         //public DateTime CallDateTime { get; set; }
-      
+
     }
 
     //public class FirstAidInstructions

@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Common.Dto
 {
@@ -22,6 +23,7 @@ namespace Common.Dto
         public double LocationY { get; set; } // קואורדינטה Y
 
         public byte[] ArrImage { get; set; } // תמונה
+        public IFormFile? FileImage { get; set; }//
 
         public string Description { get; set; } // תיאור
 

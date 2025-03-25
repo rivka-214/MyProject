@@ -28,7 +28,6 @@ namespace Mock
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
-           // optionsBuilder.UseSqlServer("server=(localdb)\\MSSQLLocalDB;database=projectShopDb;trusted_connection=true;TrustServerCertificate=True");
 
             optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS01;Database=CitizenShield;Trusted_Connection=True;TrustServerCertificate=True;\r\n");
 
