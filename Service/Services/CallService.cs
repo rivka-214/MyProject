@@ -25,25 +25,26 @@ namespace Service.Services
           return mapper.Map<Calls, CallsDto>(repository.AddItem(mapper.Map<CallsDto, Calls>(item )));
          
         }
-
         public void DeleteItem(int id)
         {
             repository.DeleteItem(id);
         }
-
         public List<CallsDto> GetAll()
         {
             return mapper.Map<List<Calls>,List<CallsDto>>(repository.GetAll());
         }
-
         public CallsDto GetById(int id)
         {
             return mapper.Map<Calls, CallsDto>(repository.GetById(id));
         }
-
         public void UpdateItem(int id, CallsDto item)
         {
+<<<<<<< HEAD
+             repository.UpdateItem(id, mapper.Map<CallsDto, Volunteers>(item));
+
+=======
              repository.UpdateItem(id, mapper.Map<CallsDto, Calls>(item));
+>>>>>>> e0db1c2e030d426d2d54f58510fdb1b41cab3ce3
         }
     }
 }

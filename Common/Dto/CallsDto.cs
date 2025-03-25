@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -22,7 +24,11 @@ namespace Common.Dto
         [Required]
         public double LocationY { get; set; } // קואורדינטה Y
 
+<<<<<<< HEAD
+        public byte[]? ArrImage { get; set; } // תמונה
+=======
         public byte[] ArrImage { get; set; } // תמונה
+>>>>>>> e0db1c2e030d426d2d54f58510fdb1b41cab3ce3
         public IFormFile? FileImage { get; set; }//
 
         public string Description { get; set; } // תיאור
