@@ -33,7 +33,7 @@ namespace MyProject.Controllers
 
         // POST api/<CategoryController>
         [HttpPost]
-        [Authorize]
+       
         public CallsDto Post([FromForm]CallsDto  call)
         {
            //23c UploadImage(call.ArrImage);
