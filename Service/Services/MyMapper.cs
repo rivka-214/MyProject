@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+
 
 namespace Service.Services
 {
@@ -13,15 +15,18 @@ namespace Service.Services
     {
         public MyMapper()
         {
-            CreateMap<CallsDto, Calls>();
-            // אפשר גם להוסיף הפיכות אם צריך (אם זה הדדי)
-            CreateMap<Calls, CallsDto>();
+            string path = Path.Combine(Environment.CurrentDirectory, "Images/");//פונקציה שמביאה לי את הניתוב
+                                                                                //string to byte[]
+            CreateMap<Calls, CallsDto>().ForMember("ArrImage", x => x.MapFrom(y => File.ReadAllBytes(path + y.ImageUrl)));
+         //   CreateMap<CallsDto, Calls>().ForMember("ImageUrl", x => x.MapFrom(y => y.FileImage.FileName));
+            
+            //CreateMap<CallsDto, Calls>();
+            //CreateMap<Calls, CallsDto>();
 
-            CreateMap<VolunteerCalls, VolunteerCallsDto>();
-            // אפשר גם להוסיף הפיכות אם צריך (אם זה הדדי)
+            CreateMap<VolunteerCalls, VolunteerCallsDto>();        
             CreateMap<VolunteerCallsDto, VolunteerCalls>(); 
-            CreateMap<Volunteers, VolunteersDto>();
-            // אפשר גם להוסיף הפיכות אם צריך (אם זה הדדי)
+
+            CreateMap<Volunteers, VolunteersDto>();      
             CreateMap<VolunteersDto, Volunteers>();
         }
     }
