@@ -7,15 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-<<<<<<< HEAD
-    <ProjectReference Include="..\MyProject\MyProject.csproj" />
-=======
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
->>>>>>> e0db1c2e030d426d2d54f58510fdb1b41cab3ce3
+  
     <ProjectReference Include="..\Repository\Repository.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Common.Dto;
+
 using Reposetory.Entities;
 using Repository.Interfacese;
 using Service.Interfaces;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Common.Dto;
 namespace Service.Services
 {
     public class CallService : IService<CallsDto>
@@ -39,12 +39,7 @@ namespace Service.Services
         }
         public void UpdateItem(int id, CallsDto item)
         {
-<<<<<<< HEAD
-             repository.UpdateItem(id, mapper.Map<CallsDto, Volunteers>(item));
-
-=======
              repository.UpdateItem(id, mapper.Map<CallsDto, Calls>(item));
->>>>>>> e0db1c2e030d426d2d54f58510fdb1b41cab3ce3
         }
     }
 }
