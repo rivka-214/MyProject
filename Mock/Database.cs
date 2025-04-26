@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Reposetory.Entities;
+using Repository.Entities;
 using Repository.Interfacese;
 using System;
 using System.Collections.Generic;
@@ -15,12 +16,11 @@ namespace Mock
     {
 
 
-     
 
         public DbSet<Calls> CallsDb { get; set; }
         public DbSet<Volunteers> VolunteersDb { get; set; }
         public DbSet<VolunteerCalls> VolunteerCallsDb { get; set; }
-
+        public DbSet<User> UsersDb { get ; set ; }
 
         public void Save()
         {
