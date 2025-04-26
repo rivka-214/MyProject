@@ -6,9 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Repository.Entities
-{
+{   
     public class User
     {
+       
         public string Id { get; set; }
         public string FirstName { get; set; }
         public string LastNAme { get; set; }
