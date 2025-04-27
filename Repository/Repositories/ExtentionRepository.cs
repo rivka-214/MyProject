@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Reposetory.Entities;
-using Repository.Entities;
 using Repository.Interfacese;
 using System;
 using System.Collections.Generic;
@@ -10,17 +9,15 @@ using System.Threading.Tasks;
 
 namespace Repository.Repositories
 {
-    public static class ExtentionReposetory
+    public static class ExtentionRepository
     {
-        public static IServiceCollection AddReposetory(this IServiceCollection services)
+        public static IServiceCollection AddRepository(this IServiceCollection services)
         {
             services.AddScoped<IRepository<Calls>, CallsRepository>();
-            services.AddScoped<IRepository<VolunteerCalls>, VolunteersCallsRepository>();
             services.AddScoped<IRepository<Volunteers>, VolunteersRepository>();
-            //services.AddScoped<IRepository<User>, UserRepository>();
+            services.AddScoped<IRepository<VolunteerCalls>, VolunteersCallsRepository>();
             return services;
+
         }
-
-
     }
 }
