@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Repository.Entities
-{
+{   
     public class User
     {
        

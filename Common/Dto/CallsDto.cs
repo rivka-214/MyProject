@@ -27,7 +27,7 @@ namespace Common.Dto
 
 
         public byte[]? ArrImage { get; set; } // תמונה
-
+     
         public IFormFile? FileImage { get; set; }//
 
         public string Description { get; set; } // תיאור
