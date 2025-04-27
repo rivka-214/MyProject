@@ -6,6 +6,7 @@ using Service.Services;
 using AutoMapper;
 using Mock;
 
+//הגדרת התלויות
 
 var builder = WebApplication.CreateBuilder(args);
 
