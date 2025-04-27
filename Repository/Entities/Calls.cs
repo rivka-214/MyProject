@@ -13,8 +13,9 @@ namespace Reposetory.Entities
     public class Calls
     {
         public int Id { get; set; }
-        public string? Region { get; set; }
+        [Required]
         public double LocationX { get; set; }
+        [Required]
         public double LocationY { get; set; }
         public string ImageUrl { get; set; }
         public string? Description { get; set; }
@@ -24,7 +25,6 @@ namespace Reposetory.Entities
         //public string InjuryType { get; set; }
         //public int SeverityLevel { get; set; }
         //public DateTime CallDateTime { get; set; }
-
     }
 
     //public class FirstAidInstructions
