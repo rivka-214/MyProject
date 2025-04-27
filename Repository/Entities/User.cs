@@ -9,8 +9,7 @@ namespace Repository.Entities
 {   
     public class User
     {
-       
-<<<<<<<<< Temporary merge branch 1
+
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastNAme { get; set; }
