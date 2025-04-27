@@ -13,7 +13,7 @@ namespace Service.Services
 {
     public class CallService : IService<CallsDto>
     {
-        private readonly IRepository<Calls> repository;
+        private readonly IRepository<Calls> repository;  
         private readonly IMapper mapper;
         public CallService(IRepository<Calls> repository,IMapper mapper)
         {

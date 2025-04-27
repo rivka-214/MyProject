@@ -26,7 +26,6 @@ namespace Reposetory.Entities
         //public string InjuryType { get; set; }
         //public int SeverityLevel { get; set; }
         //public DateTime CallDateTime { get; set; }
-
     }
 
     //public class FirstAidInstructions
