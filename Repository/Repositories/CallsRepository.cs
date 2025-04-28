@@ -42,9 +42,9 @@ namespace Repository.Repositories
 
         public void UpdateItem(int id, Calls item)
         {
-            var Volunteer = GetById(id);
-           
-            Volunteer.Status = item.Status;        
+            var call = GetById(id);
+
+            call.Status = item.Status;        
             context.Save();
         }
     }
