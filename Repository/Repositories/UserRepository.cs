@@ -38,7 +38,7 @@ namespace Repository.Repositories
 
         public User GetById(int id)
         {
-            return context.UsersDb.FirstOrDefault(x => x.Id == id);
+            return context.UsersDb.FirstOrDefault(x =>x.Id ==id);
         }
 
         public void UpdateItem(int id, User item)
