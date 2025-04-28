@@ -21,7 +21,7 @@ namespace Reposetory.Entities
 
         public string Role { get; set; } // תפקיד (חובש, מגיש עזרה ראשונה וכו')
 
-        public bool IsManager { get; set; } // האם מתנדב הוא מנהל
+     
 
         public List<VolunteerCalls> VolunteerCalls { get; set; } = new List<VolunteerCalls>();
     }
