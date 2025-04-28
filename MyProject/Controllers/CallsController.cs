@@ -44,7 +44,7 @@ namespace MyProject.Controllers
        
         public CallsDto Post([FromForm]CallsDto  call)
         {
-           //23c UploadImage(call.ArrImage);
+            UploadImage(call.FileImage);
            
             return  service.AddItem(call);
         }
@@ -55,16 +55,16 @@ namespace MyProject.Controllers
         {
             service.UpdateItem(id, value);
         }
-        //private void UploadImage(IFormFile file)
-        //{
-        //    //ניתוב לתמונה
-        //    var path = Path.Combine(Environment.CurrentDirectory, "Images/", file.FileName);
-        //    using (var stream = new FileStream(path, FileMode.Create))
-        //    {
+        private void UploadImage(IFormFile file)
+        {
+            //ניתוב לתמונה
+            var path = Path.Combine(Environment.CurrentDirectory, "Images\\", file.FileName);
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
 
-        //        file.CopyTo(stream);
-        //    }
-        //}
+                file.CopyTo(stream);
+            }
+        }
 
         // DELETE api/<CategoryController>/5
         [HttpDelete("{id}")]
