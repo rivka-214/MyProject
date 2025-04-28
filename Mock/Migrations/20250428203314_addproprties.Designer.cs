@@ -12,8 +12,8 @@ using Mock;
 namespace Mock.Migrations
 {
     [DbContext(typeof(Database))]
-    [Migration("20250427205938_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250428203314_addproprties")]
+    partial class addproprties
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -97,9 +97,6 @@ namespace Mock.Migrations
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsManager")
-                        .HasColumnType("bit");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
