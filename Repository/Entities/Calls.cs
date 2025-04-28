@@ -13,7 +13,7 @@ namespace Reposetory.Entities
     public class Calls
     {
         public int Id { get; set; }
-        [Required]
+
         public double LocationX { get; set; }
         [Required]
         public double LocationY { get; set; }
@@ -23,21 +23,5 @@ namespace Reposetory.Entities
         public string? Status { get; set; }
         public int numVolanteer { get; set; }
         public List<VolunteerCalls> VolunteerCalls { get; set; } = new List<VolunteerCalls>();
-        //public string InjuryType { get; set; }
-        //public int SeverityLevel { get; set; }
-        //public DateTime CallDateTime { get; set; }
-
     }
-
-    //public class FirstAidInstructions
-    //{
-    //    [Key]
-    //    public int Id { get; set; }
-
-    //    [Required]
-    //    public string InjuryType { get; set; }
-
-    //    [Required]
-    //    public string InstructionText { get; set; }
-    //}
 }
