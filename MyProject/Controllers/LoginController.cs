@@ -31,7 +31,7 @@ namespace MyProject.Controllers
         {
             service.AddItem(value);
         }
-        [HttpPost]
+
 
         // PUT api/<LoginController>/5
         [HttpPut("{id}")]
