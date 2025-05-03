@@ -12,7 +12,7 @@ namespace MyProject.Controllers
     {
         private readonly IService<UserDto> service;
         // GET: api/<LoginController>
-        [HttpGet] 
+        
         public LoginController(IService<UserDto> service)
         {
             this.service = service;
@@ -32,7 +32,6 @@ namespace MyProject.Controllers
             service.AddItem(value);
         }
         [HttpPost]
-        public
 
         // PUT api/<LoginController>/5
         [HttpPut("{id}")]
