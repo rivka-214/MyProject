@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Repository.Entities;
 
 
 namespace Service.Services
@@ -27,7 +28,9 @@ namespace Service.Services
             CreateMap<VolunteerCallsDto, VolunteerCalls>(); 
 
             CreateMap<Volunteers, VolunteersDto>();      
-            CreateMap<VolunteersDto, Volunteers>();
+            CreateMap<VolunteersDto, Volunteers>(); 
+
+            CreateMap<User, UserDto>().ReverseMap();
         }
     }
 }
