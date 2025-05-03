@@ -41,13 +41,18 @@ namespace MyProject.Controllers
 
         // POST api/<CategoryController>
         [HttpPost]
-       
-        public CallsDto Post([FromForm]CallsDto  call)
+
+        [HttpPost]
+        public CallsDto Post([FromForm] CallsDto call)
         {
-            UploadImage(call.FileImage);
-           
-            return  service.AddItem(call);
+            Console.WriteLine($"מיקום שהתקבל: X={call.LocationX}, Y={call.LocationY}");
+
+            if (call.FileImage != null)
+                UploadImage(call.FileImage);
+
+            return service.AddItem(call);
         }
+
 
         // PUT api/<CategoryController>/5
         [HttpPut("{id}")]
