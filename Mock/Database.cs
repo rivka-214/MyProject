@@ -32,13 +32,10 @@ namespace Mock
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=.;Database=CitizenShield;Trusted_Connection=True;TrustServerCertificate=True;\r\n");
+            optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS01;Database=CitizenShield;Trusted_Connection=True;TrustServerCertificate=True;\r\n");
 
         }
 
-        void IContext.Save()
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }
