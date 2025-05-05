@@ -21,7 +21,7 @@ namespace Reposetory.Entities
 
         public string Role { get; set; } // תפקיד (חובש, מגיש עזרה ראשונה וכו')
 
-     
+            
 
         public List<VolunteerCalls> VolunteerCalls { get; set; } = new List<VolunteerCalls>();
     }
