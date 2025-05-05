@@ -36,9 +36,5 @@ namespace Mock
 
         }
 
-        void IContext.Save()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -19,16 +19,15 @@ namespace Service.Services
             string path = Path.Combine(Environment.CurrentDirectory, "Images/");//פונקציה שמביאה לי את הניתוב
                                                                                 //string to byte[]
             CreateMap<Calls, CallsDto>().ForMember("ArrImage", x => x.MapFrom(y => File.ReadAllBytes(path + y.ImageUrl)));
-           CreateMap<CallsDto, Calls>().ForMember("ImageUrl", x => x.MapFrom(y => y.FileImage.FileName));
-            
-            //CreateMap<CallsDto, Calls>();
-            //CreateMap<Calls, CallsDto>();
+            CreateMap<CallsDto, Calls>().ForMember("ImageUrl", x => x.MapFrom(y => y.FileImage.FileName));
 
-            CreateMap<VolunteerCalls, VolunteerCallsDto>();        
-            CreateMap<VolunteerCallsDto, VolunteerCalls>(); 
 
-            CreateMap<Volunteers, VolunteersDto>();      
-            CreateMap<VolunteersDto, Volunteers>(); 
+
+            CreateMap<VolunteerCalls, VolunteerCallsDto>();
+            CreateMap<VolunteerCallsDto, VolunteerCalls>();
+
+            CreateMap<Volunteers, VolunteersDto>();
+            CreateMap<VolunteersDto, Volunteers>();
 
             CreateMap<User, UserDto>().ReverseMap();
         }

@@ -17,7 +17,8 @@ namespace Repository.Repositories
             services.AddScoped<IRepository<Calls>, CallsRepository>();
             services.AddScoped<IRepository<VolunteerCalls>, VolunteersCallsRepository>();
             services.AddScoped<IRepository<Volunteers>, VolunteersRepository>();
-            //services.AddScoped<IRepository<User>, UserRepository>();
+            services.AddScoped<IRepository<User>, UserRepository>();
+    
             return services;
         }
 
