@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Common.Dto;
 using Microsoft.Extensions.DependencyInjection;
+using Repository.Entities;
 using Repository.Repositories;
 using Service.Interfaces;
 using System;
@@ -20,6 +21,7 @@ namespace Service.Services
             services.AddScoped<IService<VolunteersDto>, VolunteerService>();
             services.AddScoped<IService<VolunteerCallsDto>, VolunteersCallService>();
             services.AddScoped<IService<VolunteerCallsDto>, VolunteersCallService>();
+            services.AddScoped<IService<UserDto>, UserService>();
             services.AddAutoMapper(typeof(MyMapper));
             return services;
         }
