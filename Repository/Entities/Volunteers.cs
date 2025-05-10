@@ -13,15 +13,19 @@ namespace Reposetory.Entities
         [Key]
         public int Id { get; set; } // מפתח ראשי
 
-     
+
         public string FullName { get; set; } // שם מלא
 
-     
+
         public string PhoneNumber { get; set; } // מספר טלפון
 
-        public string Role { get; set; } // תפקיד (חובש, מגיש עזרה ראשונה וכו')
+        public string Specialization { get; set; } // תפקיד (חובש, מגיש עזרה ראשונה וכו')
 
-            
+  
+        public string Region { get; set; }
+        public string City { get; set; } 
+
+
 
         public List<VolunteerCalls> VolunteerCalls { get; set; } = new List<VolunteerCalls>();
     }

@@ -44,7 +44,7 @@ namespace Repository.Repositories
             Volunteer.FullName = item.FullName;
             Volunteer.PhoneNumber = item.PhoneNumber;
               Volunteer.PhoneNumber = item.PhoneNumber;
-            Volunteer.Role = item.Role;
+            Volunteer.Specialization = item.Specialization;
 
             context.Save();
         }

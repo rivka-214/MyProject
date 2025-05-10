@@ -17,7 +17,7 @@ namespace Reposetory.Entities
         public double LocationX { get; set; }
         [Required]
         public double LocationY { get; set; }
-        public string ImageUrl { get; set; }
+        public string? ImageUrl { get; set; }
         public string? Description { get; set; }
         public int? UrgencyLevel { get; set; }
         public string? Status { get; set; }
