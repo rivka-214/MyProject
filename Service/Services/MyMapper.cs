@@ -18,8 +18,14 @@ namespace Service.Services
         {
             string path = Path.Combine(Environment.CurrentDirectory, "Images/");//פונקציה שמביאה לי את הניתוב
                                                                                 //string to byte[]
-            CreateMap<Calls, CallsDto>().ForMember("ArrImage", x => x.MapFrom(y => File.ReadAllBytes(path + y.ImageUrl)));
+       //     CreateMap<Calls, CallsDto>().ForMember("ArrImage", x => x.MapFrom(y => File.ReadAllBytes(path + y.ImageUrl)));
             CreateMap<CallsDto, Calls>().ForMember("ImageUrl", x => x.MapFrom(y => y.FileImage.FileName));
+            CreateMap<Calls, CallsDto>()
+    .ForMember("ArrImage", x => x.MapFrom(y =>
+        File.Exists(Path.Combine(path, y.ImageUrl))
+            ? File.ReadAllBytes(Path.Combine(path, y.ImageUrl))
+            : null
+    ));
 
 
 

@@ -5,6 +5,8 @@ using Service.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using BCrypt.Net;
+
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -38,57 +40,71 @@ namespace MyProject.Controllers
 
         // POST api/<LoginController>
         [HttpPost]
-        public void Post([FromBody] UserDto value)
+        public UserDto Post([FromBody] UserDto value)
         {
-            service.AddItem(value);
+            // הצפנה של הסיסמה לפני השמירה
+            value.password = BCrypt.Net.BCrypt.HashPassword(value.password);
+
+            return service.AddItem(value);
         }
 
+
         [HttpPost("/login")]
-        public string Login([FromBody] UserDto value)
+   
+        public IActionResult Login([FromBody] UserDto value)
         {
             var user = Authenticate(value);
+            if (user == null)
+            {
+                return Unauthorized("Invalid credentials");
+            }
+
             var token = Generate(user);
-            return token;
+            return Ok(token);
         }
 
         private string Generate(UserDto user)
         {
-            var securitykey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
-            var credentials=new SigningCredentials(securitykey,SecurityAlgorithms.HmacSha256);
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier,user.FirstName),
-                new Claim(ClaimTypes.SerialNumber,user.PhoneNumber),
-                new Claim(ClaimTypes.Email,user.Gmail),
 
+            var securitykey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securitykey, SecurityAlgorithms.HmacSha256);
+            var claims = new[] {
+            new Claim(ClaimTypes.NameIdentifier,user.password),
+            new Claim(ClaimTypes.Email,user.Gmail),
+            //new Claim(ClaimTypes.Name,user.Name),
+          //  new Claim(ClaimTypes.Role,user.Role),
+            //new Claim(ClaimTypes.GivenName,user.Name)
             };
             var token = new JwtSecurityToken(config["Jwt:Issuer"], config["Jwt:Audience"],
                 claims,
-                expires: DateTime.Now.AddDays(365),
-                signingCredentials: credentials
-
-                );
+                expires: DateTime.Now.AddMinutes(15),
+                signingCredentials: credentials);
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+
+        //    private UserDto Authenticate(UserDto value)
+        //{
+        //    // חיפוש המשתמש במערכת לפי המייל
+        //    UserDto user = service.GetAll().FirstOrDefault(x => x.Gmail == value.Gmail);
+
+        //    // אם המשתמש נמצא, בודקים אם הסיסמה תואמת
+        //    if (user != null && BCrypt.Net.BCrypt.Verify(value.password, user.password))  // השוואת סיסמאות מוצפנות
+        //    {
+        //        return user;
+        //    }
+
+        //    return null;
+        //}
         private UserDto Authenticate(UserDto value)
         {
-            UserDto user= service.GetAll().FirstOrDefault(x => x.Id == value.Id && x.FirstName == value.FirstName);
-            if(user!=null) 
+            UserDto user = service.GetAll().FirstOrDefault(x => x.password == value.password && x.Gmail == value.Gmail);
+            if (user != null)
                 return user;
             return null;
         }
 
-        // PUT api/<LoginController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
 
-        // DELETE api/<LoginController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+
     }
 }

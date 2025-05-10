@@ -44,8 +44,12 @@ namespace Repository.Repositories
         public void UpdateItem(int id, User item)
         {
             var user = GetById(id);
-
-            user.Id=item.Id;
+            user.FirstName = item.FirstName;    
+            user.password = item.password;  
+            user.FirstName=item.FirstName;
+            user.PhoneNumber = item.PhoneNumber;
+            user.Gmail = item.Gmail;
+         
             context.Save();
         }
 
