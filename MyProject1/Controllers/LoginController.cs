@@ -5,12 +5,12 @@ using Service.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using BCrypt.Net;
+//using BCrypt.Net;
 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace MyProject.Controllers
+namespace MyProject1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -43,7 +43,7 @@ namespace MyProject.Controllers
         public UserDto Post([FromBody] UserDto value)
         {
             // הצפנה של הסיסמה לפני השמירה
-            value.password = BCrypt.Net.BCrypt.HashPassword(value.password);
+           // value.password = BCrypt.Net.BCrypt.HashPassword(value.password);
 
             return service.AddItem(value);
         }
