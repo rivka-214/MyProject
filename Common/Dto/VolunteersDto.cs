@@ -12,16 +12,20 @@ namespace Common.Dto
         
         public int Id { get; set; } // מפתח ראשי
 
-        
+   //     public string Password { get; set; } // סיסמא
+
         public string FullName { get; set; } // שם מלא
 
-       
+        public string Password { get; set; } // סיסמא
+        public string Gmail { get; set; } // מייל
         public string PhoneNumber { get; set; } // מספר טלפון
 
-        public string Role { get; set; } // תפקיד (חובש, מגיש עזרה ראשונה וכו')
+        public string Specialization { get; set; } // תפקיד (חובש, מגיש עזרה ראשונה וכו')
 
-        public bool IsManager { get; set; } // האם מתנדב הוא מנהל
 
-      
+        public string Region { get; set; }
+        public string City { get; set; }
+
+
     }
 }

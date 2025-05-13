@@ -8,7 +8,6 @@ namespace Common.Dto
 {
     public class UserDto
     {
-
         public int Id { get; set; } // מפתח ראשי
         public string FirstName { get; set; }
         public string LastNAme { get; set; }
