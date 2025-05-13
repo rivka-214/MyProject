@@ -13,6 +13,8 @@ namespace Reposetory.Entities
         [Key]
         public int Id { get; set; } // מפתח ראשי
 
+        public string Password { get; set; } // סיסמא
+        public string Gmail { get; set; } // מייל
 
         public string FullName { get; set; } // שם מלא
 

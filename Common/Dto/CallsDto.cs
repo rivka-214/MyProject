@@ -17,7 +17,7 @@ namespace Common.Dto
         public int Id { get; set; } // מפתח ראשי
 
 
-        public string Region { get; set; } // אזור
+     
 
 
         public double LocationX { get; set; } // קואורדינטה X
