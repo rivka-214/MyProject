@@ -1,5 +1,4 @@
-
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -11,11 +10,10 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// ✅ Swagger + אבטחה
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
@@ -44,22 +42,43 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
+// ✅ הגדרת CORS ל-React
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins(
+    "http://localhost:3000",
+    "http://localhost:3003",
+    "http://localhost:3005"
+)
+.AllowAnyMethod()
+.AllowAnyHeader();
+    });
+});
+
+// שירותים
 builder.Services.AddDbContext<IContext, Database>();
 builder.Services.AddAutoMapper(typeof(MyMapper));
 builder.Services.AddServices();
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-              .AddJwtBearer(option =>
-              option.TokenValidationParameters = new TokenValidationParameters
-              {
-                  ValidateIssuer = true,
-                  ValidateAudience = true,
-                  ValidateLifetime = true,
-                  ValidateIssuerSigningKey = true,
-                  ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                  ValidAudience = builder.Configuration["Jwt:Audience"],
-                  IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
 
-              });
+// JWT
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(option =>
+    {
+        option.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -71,6 +90,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// ✅ הפעלת CORS
+app.UseCors("AllowReactApp");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
