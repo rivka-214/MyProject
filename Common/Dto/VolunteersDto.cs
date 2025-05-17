@@ -23,7 +23,7 @@ namespace Common.Dto
         public string Specialization { get; set; } // תפקיד (חובש, מגיש עזרה ראשונה וכו')
 
 
-        public string Region { get; set; }
+      public string Address { get; set; }
         public string City { get; set; }
 
 

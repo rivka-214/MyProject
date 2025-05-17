@@ -22,7 +22,6 @@ namespace Reposetory.Entities
         public string PhoneNumber { get; set; } // מספר טלפון
 
         public string Specialization { get; set; } // תפקיד (חובש, מגיש עזרה ראשונה וכו')
-
   
         public string Address { get; set; }
         public string City { get; set; } 
