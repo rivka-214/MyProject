@@ -34,10 +34,10 @@ namespace Common.Dto
 
         public IFormFile? FileImage { get; set; }//
 
-        public string Description { get; set; } // תיאור
+        public string? Description { get; set; } // תיאור
 
 
-        public int UrgencyLevel { get; set; } // רמת דחיפות
+        public int? UrgencyLevel { get; set; } // רמת דחיפות
 
         public string Status { get; set; } // סטטוס הקריאה
 

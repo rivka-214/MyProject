@@ -48,8 +48,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp", policy =>
     {
         policy.WithOrigins(
-    "http://localhost:3008",
-    "http://localhost:3009",
+    "http://localhost:3001",
+    "http://localhost:3000",
     "http://localhost:3005"
 )
 .AllowAnyMethod()
