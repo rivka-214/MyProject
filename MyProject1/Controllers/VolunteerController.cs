@@ -11,9 +11,11 @@ namespace MyProject1.Controllers
     public class VolunteerController : ControllerBase
     {
         private readonly IService<VolunteersDto> service;
-        public VolunteerController(IService<VolunteersDto> service)
+        private readonly IVolunteerLogic serviceLogic;
+        public VolunteerController(IService<VolunteersDto> service,IVolunteerLogic logic)
         {
             this.service = service;
+            this.serviceLogic = logic;
         }   
         // GET: api/<VolunteerController>
         [HttpGet]
@@ -29,13 +31,24 @@ namespace MyProject1.Controllers
             return service.GetById(id); 
 
         }
+        [HttpGet("nearby")]
+        public IActionResult GetNearby(double locationX, double locationY)
+        {
+            var result = serviceLogic.GetNearbyVolunteers(locationX, locationY);
+            return Ok(result);
+        }
+
 
         // POST api/<VolunteerController>
         [HttpPost]
-        public VolunteersDto Post([FromBody] VolunteersDto value)
+
+        public async Task<VolunteersDto> Post([FromBody] VolunteersDto value)
         {
-            return service.AddItem(value);
+            return await serviceLogic.RegisterVolunteerWithLocation(value);
+
         }
+     
+
 
         // PUT api/<VolunteerController>/5
         [HttpPut("{id}")]

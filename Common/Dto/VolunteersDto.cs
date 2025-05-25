@@ -26,6 +26,8 @@ namespace Common.Dto
       public string Address { get; set; }
         public string City { get; set; }
 
+        public double? LocationX { get; set; }
+        public double? LocationY { get; set; }
 
     }
 }

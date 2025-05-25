@@ -24,7 +24,9 @@ namespace Reposetory.Entities
         public string Specialization { get; set; } // תפקיד (חובש, מגיש עזרה ראשונה וכו')
   
         public string Address { get; set; }
-        public string City { get; set; } 
+        public string City { get; set; }
+        public double? LocationX { get; set; } // קו רוחב
+        public double? LocationY { get; set; } // קו אורך
 
 
 
