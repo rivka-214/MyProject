@@ -33,7 +33,9 @@ namespace Service.Services
         }
 
         public List<UserDto> GetAll()
+            
         {
+          
             return mapper.Map<List<User>, List<UserDto>>(repository.GetAll());
         }
 
