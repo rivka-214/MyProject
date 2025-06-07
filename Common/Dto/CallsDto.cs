@@ -16,10 +16,6 @@ namespace Common.Dto
 
         public int Id { get; set; } // מפתח ראשי
 
-
-     
-
-
         public double LocationX { get; set; } // קואורדינטה X
 
 
