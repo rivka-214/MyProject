@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Service.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 using Common.Dto;
+using Service.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace MyProject1.Controllers
 {
@@ -9,10 +13,12 @@ namespace MyProject1.Controllers
     public class UserController : ControllerBase
     {
         private readonly IService<UserDto> service;
+        private readonly IConfiguration config;
 
-        public UserController(IService<UserDto> service)
+        public UserController(IService<UserDto> service, IConfiguration config)
         {
             this.service = service;
+            this.config = config;
         }
 
         [HttpGet]
@@ -28,9 +34,36 @@ namespace MyProject1.Controllers
         }
 
         [HttpPost]
-        public UserDto Post([FromBody] UserDto user)
+        public IActionResult Post([FromBody] UserDto user)
         {
-            return service.AddItem(user);
+            var createdUser = service.AddItem(user);
+
+            // ✅ יצירת טוקן
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Email, createdUser.Gmail),
+                new Claim(ClaimTypes.NameIdentifier, createdUser.Id.ToString()),
+                new Claim(ClaimTypes.Role, "User")
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: config["Jwt:Issuer"],
+                audience: config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(30),
+                signingCredentials: credentials
+            );
+
+            string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return Ok(new
+            {
+                token = jwtToken,   // 👈 חובה להחזיר את הטוקן בשם token
+                role = "User"
+            });
         }
 
         [HttpPut("{id}")]
