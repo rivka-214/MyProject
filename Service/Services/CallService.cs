@@ -41,5 +41,11 @@ namespace Service.Services
         {
              repository.UpdateItem(id, mapper.Map<CallsDto, Calls>(item));
         }
+        public string GetStatus(int id)
+        {
+            var call = repository.GetById(id);
+            return call?.Status ?? "לא ידוע";
+        }
+
     }
 }

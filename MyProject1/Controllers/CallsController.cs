@@ -1,12 +1,11 @@
 
-﻿ using Microsoft.AspNetCore.Mvc;
-using System.Runtime.CompilerServices;
-
-
+using Common.Dto;
 using Microsoft.AspNetCore.Authorization;
+﻿ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
-using Common.Dto;
+using Service.Services;
+using System.Runtime.CompilerServices;
 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -77,7 +76,16 @@ namespace MyProject1.Controllers
         {
             service.DeleteItem(id);
         }
-       
+        [HttpGet("status/{id}")]
+        public IActionResult GetCallStatus(int id)
+        {
+            var call = service.GetById(id);
+            if (call == null)
+                return NotFound(new { error = "קריאה לא נמצאה" });
+
+            return Ok(new { status = call.Status });
+        }
+
 
     }
 }
