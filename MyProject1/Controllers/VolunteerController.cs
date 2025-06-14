@@ -81,8 +81,7 @@ namespace MyProject1.Controllers
                claims: claims,
                signingCredentials: credentials
            );
-  );
-
+   
             string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
 
             return Ok(new
