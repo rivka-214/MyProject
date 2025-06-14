@@ -23,7 +23,7 @@ namespace Service.Services
             services.AddScoped<IService<VolunteerCallsDto>, VolunteersCallService>();
             services.AddScoped<IService<VolunteerCallsDto>, VolunteersCallService>();
             services.AddScoped<IService<UserDto>, UserService>();
-            services.AddScoped<IVolunteerLogic, VolunteerService>();
+            services.AddScoped<IVolunteerLogic, VolunteerLogic>();
             services.AddSingleton<IFirstAidGuideService, FirstAidGuideService>();
 
             services.AddAutoMapper(typeof(MyMapper));

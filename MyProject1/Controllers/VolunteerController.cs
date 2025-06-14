@@ -42,12 +42,29 @@ namespace MyProject1.Controllers
             return Ok(result);
         }
 
+        // ✅ נקודת API חדשה – מחזירה קריאות שקרובות למתנדב
+        [HttpGet("nearby-alerts")]
+        public IActionResult GetNearbyCallsForVolunteer(int id)
+        {
+            var volunteer = service.GetById(id);
+            if (volunteer == null)
+                return NotFound("Volunteer not found");
+
+            if (volunteer.LocationX == null || volunteer.LocationY == null)
+                return BadRequest("למתנדב אין מיקום");
+
+            var calls = serviceLogic.GetNearbyOpenCalls(
+                volunteer.LocationX.Value,
+                volunteer.LocationY.Value);
+
+            return Ok(calls);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] VolunteersDto value)
         {
             var createdVolunteer = await serviceLogic.RegisterVolunteerWithLocation(value);
 
-            // ✅ יצירת טוקן למתנדב
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -59,12 +76,12 @@ namespace MyProject1.Controllers
             };
 
             var token = new JwtSecurityToken(
-                issuer: config["Jwt:Issuer"],
-                audience: config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: credentials
-            );
+               issuer: config["Jwt:Issuer"],
+               audience: config["Jwt:Audience"],
+               claims: claims,
+               signingCredentials: credentials
+           );
+  );
 
             string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
 
