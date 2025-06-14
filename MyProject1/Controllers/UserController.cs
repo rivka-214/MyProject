@@ -50,13 +50,11 @@ namespace MyProject1.Controllers
             };
 
             var token = new JwtSecurityToken(
-                issuer: config["Jwt:Issuer"],
-                audience: config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: credentials
-            );
-
+         issuer: config["Jwt:Issuer"],
+         audience: config["Jwt:Audience"],
+         claims: claims,
+         signingCredentials: credentials
+     );
             string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
 
             return Ok(new
