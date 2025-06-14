@@ -19,7 +19,7 @@ namespace Mock
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=.;Database=CitizenShield4;Trusted_Connection=True;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS01;Database=CitizenShield4;Trusted_Connection=True;TrustServerCertificate=True;");
         }
     }
 }
