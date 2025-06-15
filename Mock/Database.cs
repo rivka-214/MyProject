@@ -23,8 +23,6 @@ namespace Mock
         public DbSet<User> UsersDb { get ; set ; }
 
        
-
-
         public void Save()
         {
             SaveChanges();

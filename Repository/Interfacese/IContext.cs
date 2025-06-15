@@ -16,6 +16,7 @@ namespace Repository.Interfacese
         public DbSet<Volunteers> VolunteersDb { get; set; }
         public DbSet<VolunteerCalls> VolunteerCallsDb { get; set; }
         public DbSet<User> UsersDb { get; set; }
+       
         public void Save();
     }
 }
