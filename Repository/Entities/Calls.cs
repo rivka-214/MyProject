@@ -14,9 +14,9 @@ namespace Reposetory.Entities
     {
         public int Id { get; set; }
         [Required]
-        public double LocationX { get; set; }
+        public double? LocationX { get; set; }
         [Required]
-        public double LocationY { get; set; }
+        public double? LocationY { get; set; }
         public string? ImageUrl { get; set; }
         public string? Description { get; set; }
         public int? UrgencyLevel { get; set; }
