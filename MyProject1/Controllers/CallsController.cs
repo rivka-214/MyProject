@@ -20,10 +20,15 @@ namespace MyProject1.Controllers
     {
       
         private readonly IService<CallsDto> service;
-        public CallsController(IService<CallsDto> service)
+       
+        private readonly IVolunteersCallLogic logic;
+
+        public CallsController(IService<CallsDto> service, IVolunteersCallLogic logic)
         {
-                this.service = service;
+            this.service = service;
+            this.logic = logic;
         }
+
         // GET: api/<CategoryController>
         [HttpGet]
         public List<CallsDto> Get()
@@ -85,6 +90,14 @@ namespace MyProject1.Controllers
 
             return Ok(new { status = call.Status });
         }
+        [HttpPost("{callId}/assign-nearby")]
+       
+        public async Task<IActionResult> AssignNearbyVolunteers(int callId, [FromQuery] double locationX, [FromQuery] double locationY)
+        {
+            await logic.AssignNearbyVolunteersToCall(callId, locationX, locationY);
+            return Ok("מתנדבים הוקצו בהצלחה");
+        }
+
 
 
     }
