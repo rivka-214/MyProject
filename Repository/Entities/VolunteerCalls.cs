@@ -17,11 +17,11 @@ namespace Reposetory.Entities
         public int Id { get; set; }
         public int CallsId { get; set; }
         [ForeignKey("CallsId")]
-        public virtual Calls Calls { get; set; }
+        public virtual Calls? Calls { get; set; }
         public int VolunteerId { get; set; }
 
         [ForeignKey("VolunteerId")]
-        public virtual Volunteers Volunteer { get; set; }
+        public virtual Volunteers? Volunteer { get; set; }
 
         public DateTime TreatmentDateTime { get; set; }
 

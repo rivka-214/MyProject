@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Service.Interfaces;
 
 namespace Service.Services
 {
@@ -25,6 +26,8 @@ namespace Service.Services
             services.AddScoped<IService<UserDto>, UserService>();
             services.AddScoped<IVolunteerLogic, VolunteerLogic>();
             services.AddSingleton<IFirstAidGuideService, FirstAidGuideService>();
+            services.AddScoped<IVolunteersCallLogic, VolunteersCallService>();
+
 
             services.AddAutoMapper(typeof(MyMapper));
             return services;
