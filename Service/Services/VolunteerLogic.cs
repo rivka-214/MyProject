@@ -1,39 +1,44 @@
 ﻿using AutoMapper;
 using Common.Dto;
 using Reposetory.Entities;
+using Repository.Entities;
+using Repository.Interfacese;
 using Service.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Repository.Entities;
-using Mock;
 
 namespace Service.Services
 {
     public class VolunteerLogic : IVolunteerLogic
     {
-        private readonly Database db;
+        private readonly IRepository<Volunteers> volunteerRepo;
+        private readonly IRepository<Calls> callsRepo;
         private readonly IMapper mapper;
 
-        public VolunteerLogic(Database db, IMapper mapper)
+        public VolunteerLogic(
+            IRepository<Volunteers> volunteerRepo,
+            IRepository<Calls> callsRepo,
+            IMapper mapper)
         {
-            this.db = db;
+            this.volunteerRepo = volunteerRepo;
+            this.callsRepo = callsRepo;
             this.mapper = mapper;
         }
 
         public async Task<VolunteersDto> RegisterVolunteerWithLocation(VolunteersDto dto)
         {
             var entity = mapper.Map<Volunteers>(dto);
-            db.VolunteersDb.Add(entity);
-            await db.SaveChangesAsync();
+            volunteerRepo.AddItem(entity);
+            // בהנחה שה-AddItem שומר מיד
             return mapper.Map<VolunteersDto>(entity);
         }
 
         public List<VolunteersDto> GetNearbyVolunteers(double locationX, double locationY)
         {
-            var volunteers = db.VolunteersDb
-                .Where(v => v.LocationX != null && v.LocationY != null)
+            var volunteers = volunteerRepo.GetAll()
+                .Where(v => v.LocationX.HasValue && v.LocationY.HasValue)
                 .ToList();
 
             var nearby = volunteers
@@ -45,7 +50,7 @@ namespace Service.Services
 
         public List<CallsDto> GetNearbyOpenCalls(double locationX, double locationY)
         {
-            var calls = db.CallsDb
+            var calls = callsRepo.GetAll()
                 .Where(c => c.Status == "נפתח")
                 .ToList();
 
