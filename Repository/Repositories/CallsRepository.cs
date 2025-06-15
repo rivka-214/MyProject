@@ -44,8 +44,17 @@ namespace Repository.Repositories
         {
             var call = GetById(id);
 
-            call.Status = item.Status;        
+            if (call == null)
+                throw new Exception($"לא נמצאה קריאה עם מזהה {id}");
+
+            // עדכון שדות
+            call.Status = item.Status;
+
+            // שמירה למסד הנתונים
             context.Save();
         }
+
+
     }
 }
+

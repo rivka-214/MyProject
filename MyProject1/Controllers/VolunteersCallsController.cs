@@ -1,6 +1,7 @@
 ﻿using Common.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
+using Service.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -50,5 +51,18 @@ namespace MyProject1.Controllers
         {
             service.DeleteItem(id);
         }
+        [HttpPost("assign")]
+    
+        public async Task<IActionResult> AssignNearby([FromBody] AssignRequestDto dto)
+        {
+            var logic = service as VolunteersCallService;
+            if (logic == null)
+                return BadRequest("שירות לא תקין");
+
+            await logic.AssignNearbyVolunteersToCall(dto.CallId, dto.LocationX, dto.LocationY);
+            return Ok();
+        }
+
+
     }
 }

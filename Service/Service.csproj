@@ -21,4 +21,12 @@
     <ProjectReference Include="..\Repository\Repository.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+	  <EditorConfigFiles Remove="C:\Users\1\Desktop\MyProject\Service\Interfaces\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="C:\Users\1\Desktop\MyProject\Service\Interfaces\.editorconfig" />
+	</ItemGroup>
+
 </Project>
