@@ -2,12 +2,9 @@
 using Common.Dto;
 using Reposetory.Entities;
 using Repository.Interfacese;
-using Repository.Repositories;
 using Service.Interfaces;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Service.Services
@@ -16,19 +13,23 @@ namespace Service.Services
     {
         private readonly IRepository<VolunteerCalls> repository;
         private readonly IMapper mapper;
-        private readonly IContext context;
+        private readonly IVolunteerLogic volunteerLogic;
 
-        public VolunteersCallService(IRepository<VolunteerCalls> repository, IMapper mapper, IContext context)
+        public VolunteersCallService(
+            IRepository<VolunteerCalls> repository,
+            IMapper mapper,
+            IVolunteerLogic volunteerLogic)
         {
             this.repository = repository;
             this.mapper = mapper;
-            this.context = context;
+            this.volunteerLogic = volunteerLogic;
         }
 
         public VolunteerCallsDto AddItem(VolunteerCallsDto item)
         {
-            return mapper.Map<VolunteerCalls, VolunteerCallsDto>(repository.AddItem(mapper.Map<VolunteerCallsDto, VolunteerCalls>(item)));
-
+            var entity = mapper.Map<VolunteerCalls>(item);
+            var added = repository.AddItem(entity);
+            return mapper.Map<VolunteerCallsDto>(added);
         }
 
         public void DeleteItem(int id)
@@ -38,39 +39,38 @@ namespace Service.Services
 
         public List<VolunteerCallsDto> GetAll()
         {
-            return mapper.Map<List<VolunteerCalls>, List<VolunteerCallsDto>>(repository.GetAll());
-
+            var list = repository.GetAll();
+            return mapper.Map<List<VolunteerCallsDto>>(list);
         }
 
         public VolunteerCallsDto GetById(int id)
         {
-            return mapper.Map<VolunteerCalls, VolunteerCallsDto>(repository.GetById(id));
-
+            var item = repository.GetById(id);
+            return mapper.Map<VolunteerCallsDto>(item);
         }
 
         public void UpdateItem(int id, VolunteerCallsDto item)
         {
-            repository.UpdateItem(id, mapper.Map<VolunteerCallsDto, VolunteerCalls>(item));
+            var entity = mapper.Map<VolunteerCalls>(item);
+            repository.UpdateItem(id, entity);
         }
+
         public async Task AssignNearbyVolunteersToCall(int callId, double locationX, double locationY)
         {
-            var volunteerService = new VolunteerService(new VolunteersRepository(context), mapper);
-
-            var nearbyVolunteers = volunteerService.GetNearbyVolunteers(locationX, locationY);
+            var nearbyVolunteers = volunteerLogic.GetNearbyVolunteers(locationX, locationY);
 
             foreach (var volunteer in nearbyVolunteers)
             {
                 var newItem = new VolunteerCallsDto
                 {
                     CallsId = callId,
-                    VolunteerId = volunteer.Id,
-                    // TreatmentDateTime = DateTime.Now ← נוסיף אחר כך בלחיצה על כפתור
+                    VolunteerId = volunteer.Id
+                    // אפשר להוסיף גם TreatmentDateTime אם צריך
                 };
 
-                repository.AddItem(mapper.Map<VolunteerCallsDto, VolunteerCalls>(newItem));
+                var entity = mapper.Map<VolunteerCalls>(newItem);
+                repository.AddItem(entity);
             }
         }
-
-
     }
 }

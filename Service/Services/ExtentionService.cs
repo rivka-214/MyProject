@@ -29,6 +29,7 @@ namespace Service.Services
             services.AddScoped<IVolunteersCallLogic, VolunteersCallService>();
 
 
+
             services.AddAutoMapper(typeof(MyMapper));
             return services;
         }

@@ -66,22 +66,27 @@ namespace MyProject1.Controllers
 
         private string Generate(UserDto user)
         {
-
             var securitykey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
             var credentials = new SigningCredentials(securitykey, SecurityAlgorithms.HmacSha256);
-            var claims = new[] {
-            new Claim(ClaimTypes.NameIdentifier,user.password),
-            new Claim(ClaimTypes.Email,user.Gmail),
-            //new Claim(ClaimTypes.Name,user.Name),
-          //  new Claim(ClaimTypes.Role,user.Role),
-            //new Claim(ClaimTypes.GivenName,user.Name)
-            };
-            var token = new JwtSecurityToken(config["Jwt:Issuer"], config["Jwt:Audience"],
-                claims,
-                expires: DateTime.Now.AddMinutes(15),
-                signingCredentials: credentials);
+
+            var claims = new[]
+            {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // מזהה משתמש
+        new Claim(ClaimTypes.Email, user.Gmail),
+        new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", user.Role ?? "User") // התפקיד
+    };
+
+            var token = new JwtSecurityToken(
+                issuer: config["Jwt:Issuer"],
+                audience: config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1), // תוקף שעה
+                signingCredentials: credentials
+            );
+
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
 
 
         //    private UserDto Authenticate(UserDto value)
