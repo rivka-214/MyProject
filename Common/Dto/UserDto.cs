@@ -14,5 +14,6 @@ namespace Common.Dto
         public string PhoneNumber { get; set; }
         public string Gmail { get; set; }
         public string password { get; set; }
+        public string Role { get; set; } 
     }
 }
