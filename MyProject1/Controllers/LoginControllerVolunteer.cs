@@ -59,27 +59,30 @@ namespace MyProject1.Controllers
             return Ok(token);
         }
 
-        private string Generate(VolunteersDto Volunteer)
+        private string Generate(VolunteersDto volunteer)
         {
-
             var securitykey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
             var credentials = new SigningCredentials(securitykey, SecurityAlgorithms.HmacSha256);
-            var claims = new[] {
-            new Claim(ClaimTypes.NameIdentifier,Volunteer.Password),
-            new Claim(ClaimTypes.Email,Volunteer.Gmail),
-          // new Claim(ClaimTypes.Name,Volunteer.FullName),
-          //  new Claim(ClaimTypes.Role,volunteer.Role),
-            //new Claim(ClaimTypes.GivenName,volunteer.Name)
-            };
-            var token = new JwtSecurityToken(config["Jwt:Issuer"], config["Jwt:Audience"],
-                claims,
-                expires: DateTime.Now.AddMinutes(15),
-                signingCredentials: credentials);
+
+            var claims = new[]
+            {
+        new Claim(ClaimTypes.NameIdentifier, volunteer.Id.ToString()), // מזהה מתנדב
+        new Claim(ClaimTypes.Email, volunteer.Gmail),
+        new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Volunteer") // ✅ תפקיד ברור
+    };
+
+            var token = new JwtSecurityToken(
+      issuer: config["Jwt:Issuer"],
+      audience: config["Jwt:Audience"],
+      claims: claims,
+      expires: DateTime.UtcNow.AddHours(1), // ✅ חובה! אחרת exp לא ייכנס לטוקן
+      signingCredentials: credentials
+  );
+
             return new JwtSecurityTokenHandler().WriteToken(token);
+         
         }
 
-
-    
         private VolunteersDto Authenticate(VolunteerLogin value)
         {
             VolunteersDto volunteer = service.GetAll().FirstOrDefault(x => x.Gmail == value.Gmail&& x.Password==value.Password );

@@ -55,7 +55,7 @@ namespace MyProject1.Controllers
                 issuer: config["Jwt:Issuer"],
                 audience: config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: DateTime.UtcNow.AddMonths(1),
                 signingCredentials: credentials
             );
 

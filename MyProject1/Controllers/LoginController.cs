@@ -80,7 +80,7 @@ namespace MyProject1.Controllers
                 issuer: config["Jwt:Issuer"],
                 audience: config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1), // תוקף שעה
+                expires: DateTime.UtcNow.AddMonths(1), // תוקף שעה
                 signingCredentials: credentials
             );
 

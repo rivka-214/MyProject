@@ -79,6 +79,7 @@ namespace MyProject1.Controllers
                issuer: config["Jwt:Issuer"],
                audience: config["Jwt:Audience"],
                claims: claims,
+            expires: DateTime.UtcNow.AddDays(7),
                signingCredentials: credentials
            );
    
