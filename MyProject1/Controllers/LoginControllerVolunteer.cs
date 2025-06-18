@@ -58,6 +58,44 @@ namespace MyProject1.Controllers
             var token = Generate(volunteer);
             return Ok(token);
         }
+        [HttpPost("refresh-token")]
+        public IActionResult RefreshToken()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+
+            if (identity == null || !identity.IsAuthenticated)
+                return Unauthorized("User is not authenticated");
+
+            var claims = identity.Claims;
+            var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var gmail = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var role = claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+
+            if (userId == null || gmail == null || role == null)
+                return BadRequest("Missing claims");
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var newClaims = new[]
+            {
+        new Claim(ClaimTypes.NameIdentifier, userId),
+        new Claim(ClaimTypes.Email, gmail),
+        new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", role)
+    };
+
+            var token = new JwtSecurityToken(
+                issuer: config["Jwt:Issuer"],
+                audience: config["Jwt:Audience"],
+                claims: newClaims,
+                expires: DateTime.UtcNow.AddDays(7),
+                signingCredentials: credentials
+            );
+
+            string newJwt = new JwtSecurityTokenHandler().WriteToken(token);
+            return Ok(new { token = newJwt });
+        }
+
 
         private string Generate(VolunteersDto volunteer)
         {
@@ -75,7 +113,7 @@ namespace MyProject1.Controllers
       issuer: config["Jwt:Issuer"],
       audience: config["Jwt:Audience"],
       claims: claims,
-      expires: DateTime.UtcNow.AddHours(1), // ✅ חובה! אחרת exp לא ייכנס לטוקן
+      expires: DateTime.UtcNow.AddDays(7), // ✅ חובה! אחרת exp לא ייכנס לטוקן
       signingCredentials: credentials
   );
 
