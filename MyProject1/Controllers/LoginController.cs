@@ -63,6 +63,8 @@ namespace MyProject1.Controllers
             var token = Generate(user);
             return Ok(token);
         }
+     
+
 
         private string Generate(UserDto user)
         {
@@ -80,7 +82,7 @@ namespace MyProject1.Controllers
                 issuer: config["Jwt:Issuer"],
                 audience: config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMonths(1), // תוקף שעה
+                expires: DateTime.UtcNow.AddYears(10), 
                 signingCredentials: credentials
             );
 
