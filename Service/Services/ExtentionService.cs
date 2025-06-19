@@ -27,6 +27,7 @@ namespace Service.Services
             services.AddScoped<IVolunteerLogic, VolunteerLogic>();
             services.AddSingleton<IFirstAidGuideService, FirstAidGuideService>();
             services.AddScoped<IVolunteersCallLogic, VolunteersCallService>();
+            services.AddScoped<ICallService, CallService>();
 
 
 

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Service.Interfaces;
+using Service.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -15,6 +16,7 @@ namespace MyProject1.Controllers
         private readonly IService<VolunteersDto> service;
         private readonly IVolunteerLogic serviceLogic;
         private readonly IConfiguration config;
+
 
         public VolunteerController(IService<VolunteersDto> service, IVolunteerLogic logic, IConfiguration config)
         {
@@ -44,19 +46,16 @@ namespace MyProject1.Controllers
 
         // ✅ נקודת API חדשה – מחזירה קריאות שקרובות למתנדב
         [HttpGet("nearby-alerts")]
-        public IActionResult GetNearbyCallsForVolunteer(int id)
+        public IActionResult GetNearbyAlerts([FromQuery] int id)
         {
             var volunteer = service.GetById(id);
             if (volunteer == null)
-                return NotFound("Volunteer not found");
+                return NotFound("מתנדב לא נמצא");
 
             if (volunteer.LocationX == null || volunteer.LocationY == null)
                 return BadRequest("למתנדב אין מיקום");
 
-            var calls = serviceLogic.GetNearbyOpenCalls(
-                volunteer.LocationX.Value,
-                volunteer.LocationY.Value);
-
+            var calls = serviceLogic.GetNearbyOpenCalls(volunteer.LocationX.Value, volunteer.LocationY.Value);
             return Ok(calls);
         }
 

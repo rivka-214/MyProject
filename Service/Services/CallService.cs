@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Common.Dto;
 namespace Service.Services
 {
-    public class CallService : IService<CallsDto>
+    public class CallService : IService<CallsDto>,ICallService
     {
         private readonly IRepository<Calls> repository;  
         private readonly IMapper mapper;
@@ -46,6 +46,16 @@ namespace Service.Services
             var call = repository.GetById(id);
             return call?.Status ?? "לא ידוע";
         }
+        public void UpdateStatus(int id, string status)
+        {
+            var call = repository.GetById(id);
+            if (call != null)
+            {
+                call.Status = status;
+                repository.UpdateItem(id, call);
+            }
+        }
+
 
     }
 }

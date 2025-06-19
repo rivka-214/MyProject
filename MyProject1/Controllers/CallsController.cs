@@ -22,11 +22,13 @@ namespace MyProject1.Controllers
         private readonly IService<CallsDto> service;
        
         private readonly IVolunteersCallLogic logic;
+        private readonly ICallService callService;
 
-        public CallsController(IService<CallsDto> service, IVolunteersCallLogic logic)
+        public CallsController(IService<CallsDto> service, IVolunteersCallLogic logic,ICallService callService)
         {
             this.service = service;
             this.logic = logic;
+            this.callService = callService;
         }
 
         // GET: api/<CategoryController>
@@ -98,6 +100,12 @@ namespace MyProject1.Controllers
             return Ok("מתנדבים הוקצו בהצלחה");
         }
 
+        [HttpPut("{id}/status")]
+        public IActionResult UpdateStatus(int id, [FromBody] StatusDto statusDto)
+        {
+            callService.UpdateStatus(id, statusDto.Status);
+            return Ok();
+        }
 
 
     }

@@ -55,22 +55,23 @@ namespace Service.Services
             repository.UpdateItem(id, entity);
         }
 
-        public async Task AssignNearbyVolunteersToCall(int callId, double locationX, double locationY)
+      public async Task AssignNearbyVolunteersToCall(int callId, double locationX, double locationY)
+{
+    var nearbyVolunteers = volunteerLogic.GetNearbyVolunteers(locationX, locationY);
+
+    foreach (var volunteer in nearbyVolunteers)
+    {
+        var newItem = new VolunteerCallsDto
         {
-            var nearbyVolunteers = volunteerLogic.GetNearbyVolunteers(locationX, locationY);
+            CallsId = callId,
+            VolunteerId = volunteer.Id
+            // אפשר להוסיף גם TreatmentDateTime אם צריך
+        };
 
-            foreach (var volunteer in nearbyVolunteers)
-            {
-                var newItem = new VolunteerCallsDto
-                {
-                    CallsId = callId,
-                    VolunteerId = volunteer.Id
-                    // אפשר להוסיף גם TreatmentDateTime אם צריך
-                };
+        var entity = mapper.Map<VolunteerCalls>(newItem);
+        repository.AddItem(entity);
+    }
+}
 
-                var entity = mapper.Map<VolunteerCalls>(newItem);
-                repository.AddItem(entity);
-            }
-        }
     }
 }

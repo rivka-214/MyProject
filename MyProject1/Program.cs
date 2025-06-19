@@ -61,7 +61,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<IContext, Database>();
 builder.Services.AddAutoMapper(typeof(MyMapper));
 builder.Services.AddServices();
-
+builder.Services.AddSignalR();
 // JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>
@@ -97,5 +97,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+//app.MapHub<VolunteersHub>("/volunteersHub");
 
 app.Run();
