@@ -9,6 +9,7 @@ namespace Service.Interfaces
     public interface ICallService
     {
         string GetStatus(int callId);
+        void UpdateStatus(int id, string status);
     }
 
 }
