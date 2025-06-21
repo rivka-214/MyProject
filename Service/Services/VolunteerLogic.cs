@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Common.Dto;
+using Microsoft.EntityFrameworkCore;
 using Reposetory.Entities;
 using Repository.Entities;
 using Repository.Interfacese;
@@ -119,6 +120,16 @@ namespace Service.Services
             public string lat { get; set; }
             public string lon { get; set; }
         }
+
+        public List<CallsDto> GetCallsByStatus(string status)
+        {
+            var calls = callsRepo.GetAll()
+                .Where(c => c.Status == status)
+                .ToList();
+
+            return mapper.Map<List<CallsDto>>(calls);
+        }
+
 
     }
 }

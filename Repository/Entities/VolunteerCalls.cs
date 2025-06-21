@@ -21,6 +21,7 @@ namespace Reposetory.Entities
         public int VolunteerId { get; set; }
 
         [ForeignKey("VolunteerId")]
+        public string? VolunteerStatus { get; set; }
         public virtual Volunteers? Volunteer { get; set; }
 
         public DateTime TreatmentDateTime { get; set; }

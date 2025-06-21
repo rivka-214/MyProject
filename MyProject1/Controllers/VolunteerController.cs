@@ -102,5 +102,12 @@ namespace MyProject1.Controllers
         {
             service.DeleteItem(id);
         }
+        [HttpGet("by-status")]
+        public IActionResult GetCallsByStatus([FromQuery] string status)
+        {
+            var calls = serviceLogic.GetCallsByStatus(status);
+            return Ok(calls);
+        }
+
     }
 }

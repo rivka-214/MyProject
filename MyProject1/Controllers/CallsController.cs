@@ -106,6 +106,12 @@ namespace MyProject1.Controllers
             callService.UpdateStatus(id, statusDto.Status);
             return Ok();
         }
+        [HttpPut("{id}/complete")]
+        public IActionResult CompleteCall(int id, [FromBody] CompleteCallDto dto)
+        {
+            callService.CompleteCall(id, dto);
+            return Ok("הקריאה עודכנה בהצלחה");
+        }
 
 
     }
