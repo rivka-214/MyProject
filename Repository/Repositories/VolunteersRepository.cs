@@ -1,4 +1,5 @@
-﻿using Reposetory.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Reposetory.Entities;
 using Repository.Interfacese;
 using System;
 using System.Collections.Generic;
@@ -49,8 +50,7 @@ namespace Repository.Repositories
             context.Save();
         }
 
-
-
+        
 
 
 

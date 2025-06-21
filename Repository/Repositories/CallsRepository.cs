@@ -1,4 +1,5 @@
-﻿using Reposetory.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Reposetory.Entities;
 using Repository.Interfacese;
 using System;
 using System.Collections.Generic;
@@ -47,14 +48,15 @@ namespace Repository.Repositories
             if (call == null)
                 throw new Exception($"לא נמצאה קריאה עם מזהה {id}");
 
-            // עדכון שדות
             call.Status = item.Status;
+            call.Summary = item.Summary;
+            call.SentToHospital = item.SentToHospital;
+            call.HospitalName = item.HospitalName;
 
-            // שמירה למסד הנתונים
             context.Save();
         }
 
-
+       
     }
 }
 

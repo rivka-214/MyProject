@@ -22,6 +22,12 @@ namespace Reposetory.Entities
         public int? UrgencyLevel { get; set; }
         public string? Status { get; set; }
         public int numVolanteer { get; set; }
+        public string? Summary { get; set; }
+        public bool? SentToHospital { get; set; }
+        public string? HospitalName { get; set; }
+     
+
+
         public List<VolunteerCalls> VolunteerCalls { get; set; } = new List<VolunteerCalls>();
        
     }

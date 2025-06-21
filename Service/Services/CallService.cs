@@ -55,6 +55,18 @@ namespace Service.Services
                 repository.UpdateItem(id, call);
             }
         }
+        public void CompleteCall(int id, CompleteCallDto dto)
+        {
+            var call = repository.GetById(id);
+            if (call == null)
+                throw new Exception("קריאה לא קיימת");
+
+            call.Summary = dto.Summary;
+            call.SentToHospital = dto.SentToHospital;
+            call.HospitalName = dto.SentToHospital ? dto.HospitalName : null;
+
+            repository.UpdateItem(id, call);
+        }
 
 
     }
