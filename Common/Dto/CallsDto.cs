@@ -24,9 +24,9 @@ namespace Common.Dto
 
         public byte[]? ArrImage { get; set; } // תמונה
 
-      //  public string ImageUrl { get; set; } = string.Empty;  // ערך ברירת מחדל
+        //  public string ImageUrl { get; set; } = string.Empty;  // ערך ברירת מחדל
 
-
+        public DateTime? Date { get; set; }
 
         public IFormFile? FileImage { get; set; }//
 

@@ -10,5 +10,6 @@ namespace Service.Interfaces
         List<VolunteersDto> GetNearbyVolunteers(double locationX, double locationY);
         List<CallsDto> GetNearbyOpenCalls(double locationX, double locationY);
         List<CallsDto> GetCallsByStatus(string status);
+
     }
 }

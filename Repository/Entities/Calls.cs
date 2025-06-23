@@ -25,6 +25,7 @@ namespace Reposetory.Entities
         public string? Summary { get; set; }
         public bool? SentToHospital { get; set; }
         public string? HospitalName { get; set; }
+        public DateTime? Date { get; set; }
      
 
 
