@@ -27,13 +27,16 @@ namespace Service.Services
             : null
     ));
 
+           
+            CreateMap<VolunteerCalls, VolunteerCallsDto>()
+                .ForMember(dest => dest.Call, opt => opt.MapFrom(src => src.Calls))
+                .ReverseMap()
+                .ForMember(dest => dest.Calls, opt => opt.MapFrom(src => src.Call));
 
+            
+            CreateMap<Volunteers, VolunteersDto>().ReverseMap();
 
-            CreateMap<VolunteerCalls, VolunteerCallsDto>();
-            CreateMap<VolunteerCallsDto, VolunteerCalls>();
-
-            CreateMap<Volunteers, VolunteersDto>();
-            CreateMap<VolunteersDto, Volunteers>();
+ 
 
             CreateMap<User, UserDto>().ReverseMap();
         }
