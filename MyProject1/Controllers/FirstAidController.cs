@@ -21,11 +21,12 @@ namespace MyProject1.Controllers
             var guides = await _guideService.GetGuidesByTextAsync(description);
             return Ok(guides);
         }
-        [HttpGet("all")]
-        public ActionResult<List<FirstAidGuide>> All()
-        {
-            return Ok(_guideService.GetAll());
-        }
 
+        [HttpGet("all")]
+        public async Task<ActionResult<List<FirstAidGuide>>> All()
+        {
+            var guides = await Task.FromResult(_guideService.GetAll());
+            return Ok(guides);
+        }
     }
 }

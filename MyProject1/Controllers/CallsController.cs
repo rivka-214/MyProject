@@ -31,69 +31,79 @@ namespace MyProject1.Controllers
             this.callService = callService;
         }
 
-        // GET: api/<CategoryController>
-        [HttpGet]
-        public List<CallsDto> Get()
+        // GET: api/<CategoryController>      
+        [HttpGet] 
+        [Authorize]
+        public async Task<List<CallsDto>> Get()
         {
-            return service.GetAll();
+            return await service.GetAllAsync();
         }
 
-        // GET api/<CategoryController>/5
         [HttpGet("{id}")]
-        public CallsDto Get(int id)
+        [Authorize]
+        public async Task<CallsDto> Get(int id)
         {
-            return service.GetById(id);
+            return await service.GetByIdAsync(id);
         }
 
-        // POST api/<CategoryController>
-        [HttpPost]
 
         [HttpPost]
-        public CallsDto Post([FromForm] CallsDto call)
+        [Authorize]
+      
+        public async Task<CallsDto> Post([FromForm] CallsDto call)
         {
             Console.WriteLine($"מיקום שהתקבל: X={call.LocationX}, Y={call.LocationY}");
 
             if (call.FileImage != null)
-                UploadImage(call.FileImage);
+                await UploadImage(call.FileImage);
 
-            return service.AddItem(call);
+            call.Status = "נפתחה";
+            var savedCall = await service.AddItemAsync(call);
+
+            if (call.LocationX != 0 && call.LocationY != 0)
+            {
+                await logic.AssignNearbyVolunteersToCall(savedCall.Id, call.LocationX, call.LocationY);
+            }
+
+            return savedCall;
         }
 
 
-        // PUT api/<CategoryController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] CallsDto value)
+        [Authorize]
+        public async Task Put(int id, [FromBody] CallsDto value)
         {
-            service.UpdateItem(id, value);
+            await Task.Run(() => service.UpdateItemAsync(id, value));
         }
-        private void UploadImage(IFormFile file)
+
+        private async Task UploadImage(IFormFile file)
         {
-            //ניתוב לתמונה
             var path = Path.Combine(Environment.CurrentDirectory, "Images\\", file.FileName);
             using (var stream = new FileStream(path, FileMode.Create))
             {
-
-                file.CopyTo(stream);
+                await file.CopyToAsync(stream);
             }
         }
 
-        // DELETE api/<CategoryController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        [Authorize]
+        public async Task Delete(int id)
         {
-            service.DeleteItem(id);
+            await Task.Run(() => service.DeleteItemAsync(id));
         }
+
         [HttpGet("status/{id}")]
-        public IActionResult GetCallStatus(int id)
+        public async Task<IActionResult> GetCallStatus(int id)
         {
-            var call = service.GetById(id);
+            var call = await Task.FromResult(service.GetByIdAsync(id));
             if (call == null)
                 return NotFound(new { error = "קריאה לא נמצאה" });
 
             return Ok(new { status = call.Status });
         }
+
         [HttpPost("{callId}/assign-nearby")]
-       
+        [Authorize]
         public async Task<IActionResult> AssignNearbyVolunteers(int callId, [FromQuery] double locationX, [FromQuery] double locationY)
         {
             await logic.AssignNearbyVolunteersToCall(callId, locationX, locationY);
@@ -101,18 +111,20 @@ namespace MyProject1.Controllers
         }
 
         [HttpPut("{id}/status")]
-        public IActionResult UpdateStatus(int id, [FromBody] StatusDto statusDto)
+        [Authorize]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] StatusDto statusDto)
         {
-            callService.UpdateStatus(id, statusDto.Status);
+            await Task.Run(() => callService.UpdateStatus(id, statusDto.Status));
             return Ok();
         }
+
         [HttpPut("{id}/complete")]
-        public IActionResult CompleteCall(int id, [FromBody] CompleteCallDto dto)
+        [Authorize]
+        public async Task<IActionResult> CompleteCall(int id, [FromBody] CompleteCallDto dto)
         {
-            callService.CompleteCall(id, dto);
+            await Task.Run(() => callService.CompleteCall(id, dto));
             return Ok("הקריאה עודכנה בהצלחה");
         }
-
-
     }
 }
+

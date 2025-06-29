@@ -1,4 +1,5 @@
-﻿using Reposetory.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Reposetory.Entities;
 using Repository.Entities;
 using Repository.Interfacese;
 using System;
@@ -10,59 +11,46 @@ using System.Threading.Tasks;
 namespace Repository.Repositories
 {
     internal class UserRepository : IRepository<User>
-
     {
         private readonly IContext context;
         public UserRepository(IContext context)
         {
             this.context = context;
         }
-        public User AddItem(User item)
+
+        public async Task<User> AddItem(User item)
         {
-            this.context.UsersDb.Add(item);
-            this.context.Save();
+            await this.context.UsersDb.AddAsync(item);
+            await this.context.SaveAsync();
             return item;
         }
 
-        public void DeleteItem(int id)
+        public async Task DeleteItem(int id)
         {
-
-            this.context.UsersDb.Remove(GetById(id));
-            this.context.Save();
+            var user = await GetById(id);
+            this.context.UsersDb.Remove(user);
+            await this.context.SaveAsync();
         }
 
-        public List<User> GetAll()
+        public async Task<List<User>> GetAll()
         {
-            return this.context.UsersDb.ToList();
+            return await this.context.UsersDb.ToListAsync();
         }
 
-        public User GetById(int id)
+        public async Task<User> GetById(int id)
         {
-            return context.UsersDb.FirstOrDefault(x =>x.Id ==id);
+            return await context.UsersDb.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public void UpdateItem(int id, User item)
+        public async Task UpdateItem(int id, User item)
         {
-            var user = GetById(id);
-            user.FirstName = item.FirstName;    
-            user.password = item.password;  
-            user.FirstName=item.FirstName;
+            var user = await GetById(id);
+            user.FirstName = item.FirstName;
+            user.password = item.password;
             user.PhoneNumber = item.PhoneNumber;
             user.Gmail = item.Gmail;
-         
-            context.Save();
+
+            await context.SaveAsync();
         }
-
-
-
-    
-
-        
-
-    
-      
-        
-
-      
     }
 }

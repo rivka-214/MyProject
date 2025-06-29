@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Reposetory.Entities;
+using Repository.Entities;
 using Repository.Interfacese;
 using System;
 using System.Collections.Generic;
@@ -17,43 +18,40 @@ namespace Repository.Repositories
             this.context = context;
         }
 
-        public Volunteers AddItem(Volunteers item)
+        public async Task<Volunteers> AddItem(Volunteers item)
         {
-            this.context.VolunteersDb.Add(item);
-            this.context.Save();
+            await this.context.VolunteersDb.AddAsync(item);
+            await this.context.SaveAsync();
             return item;
         }
-        public void DeleteItem(int id)
+
+        public async Task DeleteItem(int id)
         {
-            this.context.VolunteersDb.Remove(GetById(id));
-            this.context.Save();
+            var volunteer = await GetById(id);
+            this.context.VolunteersDb.Remove(volunteer);
+            await this.context.SaveAsync();
         }
 
-        public List<Volunteers> GetAll()
+        public async Task<List<Volunteers>> GetAll()
         {
-            return this.context.VolunteersDb.ToList();
+            return await this.context.VolunteersDb.ToListAsync();
         }
 
-        public Volunteers GetById(int id)
+        public async Task<Volunteers> GetById(int id)
         {
-            return context.VolunteersDb.FirstOrDefault(x => x.Id == id);
+            return await context.VolunteersDb.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public void UpdateItem(int id, Volunteers item)
+        public async Task UpdateItem(int id, Volunteers item)
         {
-            var Volunteer = GetById(id);
+            var Volunteer = await GetById(id);
             Volunteer.FullName = item.FullName;
             Volunteer.PhoneNumber = item.PhoneNumber;
-              Volunteer.PhoneNumber = item.PhoneNumber;
             Volunteer.Specialization = item.Specialization;
 
-            context.Save();
+            await context.SaveAsync();
         }
-
-        
-
-
-
-
     }
 }
+
+
