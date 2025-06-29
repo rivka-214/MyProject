@@ -7,8 +7,6 @@ namespace Service.Services
     public interface IFirstAidGuideService
     {
         Task<List<FirstAidGuide>> GetGuidesByTextAsync(string description);
-
-        // ✅ הוספה:
         List<FirstAidGuide> GetAll();
     }
 
@@ -32,23 +30,18 @@ namespace Service.Services
                 PropertyNameCaseInsensitive = true
             };
             _guides = JsonSerializer.Deserialize<List<FirstAidGuide>>(json, options) ?? new();
-
             Console.WriteLine($"✅ Loaded {_guides.Count} guides from JSON");
-
         }
 
         public Task<List<FirstAidGuide>> GetGuidesByTextAsync(string description)
         {
             var desc = description.ToLower();
-
             var result = _guides
                 .Where(g => g.Tags != null && g.Tags.Any(tag => desc.Contains(tag.ToLower())))
                 .ToList();
-
             return Task.FromResult(result);
         }
 
-        // ✅ מימוש של GetAll
         public List<FirstAidGuide> GetAll()
         {
             return _guides;

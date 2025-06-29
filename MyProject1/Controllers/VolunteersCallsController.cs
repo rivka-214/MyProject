@@ -1,9 +1,8 @@
 ﻿using Common.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
-using Service.Services;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MyProject1.Controllers
 {
@@ -13,68 +12,59 @@ namespace MyProject1.Controllers
     {
         private readonly IService<VolunteerCallsDto> service;
         private readonly IVolunteersCallLogic volunteerCallService;
+        private readonly IService<VolunteersDto> volunteerService;
+        private readonly IService<CallsDto> callsService;
 
-        public VolunteersCallsController(IService<VolunteerCallsDto> service, IVolunteersCallLogic volunteerCallService)
+        public VolunteersCallsController(
+            IService<VolunteerCallsDto> service,
+            IVolunteersCallLogic volunteerCallService,
+            IService<VolunteersDto> volunteerService,
+            IService<CallsDto> callsService)
         {
             this.service = service;
             this.volunteerCallService = volunteerCallService;
+            this.volunteerService = volunteerService;
+            this.callsService = callsService;
         }
-        // GET: api/<VolunteersCallsController>
+
         [HttpGet]
-        public List<VolunteerCallsDto> Get()
+        public async Task<List<VolunteerCallsDto>> Get()
         {
-            return service.GetAll();
+            return await service.GetAllAsync();
         }
 
-        // GET api/<VolunteerController>/5
         [HttpGet("{id}")]
-        public VolunteerCallsDto Get(int id)
+        public async Task<VolunteerCallsDto> Get(int id)
         {
-            return service.GetById(id);
-
+            return await service.GetByIdAsync(id);
         }
 
-        // POST api/<VolunteerController>
         [HttpPost]
-        public VolunteerCallsDto Post([FromBody] VolunteerCallsDto value)
+        public async Task<VolunteerCallsDto> Post([FromBody] VolunteerCallsDto value)
         {
-            return service.AddItem(value);
+            return await service.AddItemAsync(value);
         }
 
-        // PUT api/<VolunteerController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] VolunteerCallsDto value)
+        public async Task<IActionResult> Put(int id, [FromBody] VolunteerCallsDto value)
         {
-            service.UpdateItem(id, value);
+            await service.UpdateItemAsync(id, value);
+            return NoContent();
         }
 
-        // DELETE api/<VolunteerController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            service.DeleteItem(id);
+            await service.DeleteItemAsync(id);
+            return NoContent();
         }
-        [HttpPost("assign")]
-
-        public async Task<IActionResult> AssignNearby([FromBody] AssignRequestDto dto)
-        {
-            var logic = service as VolunteersCallService;
-            if (logic == null)
-                return BadRequest("שירות לא תקין");
-
-            await logic.AssignNearbyVolunteersToCall(dto.CallId, dto.LocationX, dto.LocationY);
-            return Ok();
-        }
-
-        /// GET /api/VolunteerCalls/active/{volunteerId}
-        /// מחזיר קריאות פעילות למתנדב
 
         [HttpGet("active/{volunteerId}")]
-        public ActionResult<List<VolunteerCallsDto>> GetActiveCalls(int volunteerId)
+        public async Task<ActionResult<List<VolunteerCallsDto>>> GetActiveCalls(int volunteerId)
         {
             try
             {
-                var activeCalls = volunteerCallService.GetActiveCallsForVolunteer(volunteerId);
+                var activeCalls = await volunteerCallService.GetActiveCallsForVolunteer(volunteerId);
                 return Ok(activeCalls);
             }
             catch (System.Exception ex)
@@ -83,16 +73,12 @@ namespace MyProject1.Controllers
             }
         }
 
-        /// <summary>
-        /// GET /api/VolunteerCalls/history/{volunteerId}
-        /// מחזיר היסטוריית קריאות למתנדב
-        /// </summary>
         [HttpGet("history/{volunteerId}")]
-        public ActionResult<List<VolunteerCallsDto>> GetHistoryCalls(int volunteerId)
+        public async Task<ActionResult<List<VolunteerCallsDto>>> GetHistoryCalls(int volunteerId)
         {
             try
             {
-                var historyCalls = volunteerCallService.GetHistoryCallsForVolunteer(volunteerId);
+                var historyCalls = await volunteerCallService.GetHistoryCallsForVolunteer(volunteerId);
                 return Ok(historyCalls);
             }
             catch (System.Exception ex)
@@ -101,16 +87,12 @@ namespace MyProject1.Controllers
             }
         }
 
-        /// <summary>
-        /// POST /api/VolunteerCalls/respond
-        /// מתנדב מגיב לקריאה (going/cant)
-        /// </summary>
         [HttpPost("respond")]
-        public ActionResult RespondToCall([FromBody] VolunteerResponseDto request)
+        public async Task<ActionResult> RespondToCall([FromBody] VolunteerResponseDto request)
         {
             try
             {
-                volunteerCallService.RespondToCall(request.CallId, request.VolunteerId, request.Response);
+                await volunteerCallService.RespondToCall(request.CallId, request.VolunteerId, request.Response);
                 return Ok(new { message = "תגובה נשמרה בהצלחה" });
             }
             catch (System.Exception ex)
@@ -119,16 +101,12 @@ namespace MyProject1.Controllers
             }
         }
 
-        /// <summary>
-        /// PUT /api/VolunteerCalls/{callId}/{volunteerId}/status
-        /// עדכון סטטוס מתנדב לקריאה ספציפית
-        /// </summary>
         [HttpPut("{callId}/{volunteerId}/status")]
-        public ActionResult UpdateVolunteerStatus(int callId, int volunteerId, [FromBody] UpdateVolunteerStatusDto request)
+        public async Task<ActionResult> UpdateVolunteerStatus(int callId, int volunteerId, [FromBody] UpdateVolunteerStatusDto request)
         {
             try
             {
-                volunteerCallService.UpdateVolunteerStatus(callId, volunteerId, request.Status, request.Summary);
+                await volunteerCallService.UpdateVolunteerStatus(callId, volunteerId, request.Status, request.Summary);
                 return Ok(new { message = "סטטוס עודכן בהצלחה" });
             }
             catch (System.Exception ex)
@@ -137,16 +115,12 @@ namespace MyProject1.Controllers
             }
         }
 
-        /// <summary>
-        /// GET /api/VolunteerCalls/{callId}/info
-        /// מידע על מתנדבים שיצאו לקריאה
-        /// </summary>
         [HttpGet("{callId}/info")]
-        public ActionResult<CallVolunteersInfoDto> GetCallVolunteersInfo(int callId)
+        public async Task<ActionResult<CallVolunteersInfoDto>> GetCallVolunteersInfo(int callId)
         {
             try
             {
-                var info = volunteerCallService.GetCallVolunteersInfo(callId);
+                var info = await volunteerCallService.GetCallVolunteersInfo(callId);
                 return Ok(new CallVolunteersInfoDto
                 {
                     CallId = callId,
@@ -160,6 +134,3 @@ namespace MyProject1.Controllers
         }
     }
 }
-
-
-

@@ -14,41 +14,43 @@ namespace Service.Services
 {
     public class UserService : IService<UserDto>
     {
-
         private readonly IRepository<User> repository;
         private readonly IMapper mapper;
+
         public UserService(IRepository<User> repository, IMapper mapper)
         {
             this.repository = repository;
             this.mapper = mapper;
         }
-        public UserDto AddItem(UserDto item)
+
+        public async Task<UserDto> AddItemAsync(UserDto item)
         {
-            return mapper.Map<User, UserDto>(repository.AddItem(mapper.Map<UserDto, User>(item)));
+            var entity = mapper.Map<User>(item);
+            var added = await repository.AddItem(entity);
+            return mapper.Map<UserDto>(added);
         }
 
-        public void DeleteItem(int id)
+        public async Task DeleteItemAsync(int id)
         {
-            repository.DeleteItem(id);
+            await repository.DeleteItem(id);
         }
 
-        public List<UserDto> GetAll()
-            
+        public async Task<List<UserDto>> GetAllAsync()
         {
-          
-            return mapper.Map<List<User>, List<UserDto>>(repository.GetAll());
+            var list = await repository.GetAll();
+            return mapper.Map<List<UserDto>>(list);
         }
 
-        public UserDto GetById(int id)
+        public async Task<UserDto> GetByIdAsync(int id)
         {
-            return mapper.Map<User, UserDto>(repository.GetById(id));
+            var entity = await repository.GetById(id);
+            return mapper.Map<UserDto>(entity);
         }
 
-        public void UpdateItem(int id, UserDto item)
+        public async Task UpdateItemAsync(int id, UserDto item)
         {
-            repository.UpdateItem(id, mapper.Map<UserDto, User>(item));
+            var entity = mapper.Map<User>(item);
+            await repository.UpdateItem(id, entity);
         }
-
-
     }
 }

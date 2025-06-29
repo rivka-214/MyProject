@@ -1,4 +1,7 @@
-﻿using AutoMapper;
+﻿
+
+
+using AutoMapper;
 using Common.Dto;
 using Reposetory.Entities;
 using Repository.Interfacese;
@@ -22,33 +25,37 @@ namespace Service.Services
             this.mapper = mapper;
         }
 
-        public VolunteersDto AddItem(VolunteersDto item)
+        public async Task<VolunteersDto> AddItemAsync(VolunteersDto item)
         {
-            return mapper.Map<VolunteersDto>(
-                repository.AddItem(mapper.Map<Volunteers>(item))
-            );
+            var entity = mapper.Map<Volunteers>(item);
+            var added = await repository.AddItem(entity);
+            return mapper.Map<VolunteersDto>(added);
         }
 
-        public void DeleteItem(int id)
+        public async Task DeleteItemAsync(int id)
         {
-            repository.DeleteItem(id);
+            await repository.DeleteItem(id);
         }
 
-        public List<VolunteersDto> GetAll()
+        public async Task<List<VolunteersDto>> GetAllAsync()
         {
-            return mapper.Map<List<VolunteersDto>>(repository.GetAll());
+            var list = await repository.GetAll();
+            return mapper.Map<List<VolunteersDto>>(list);
         }
 
-        public VolunteersDto GetById(int id)
+        public async Task<VolunteersDto> GetByIdAsync(int id)
         {
-            return mapper.Map<VolunteersDto>(repository.GetById(id));
+            var entity = await repository.GetById(id);
+            return mapper.Map<VolunteersDto>(entity);
         }
 
-        public void UpdateItem(int id, VolunteersDto item)
+        public async Task UpdateItemAsync(int id, VolunteersDto item)
         {
-            repository.UpdateItem(id, mapper.Map<Volunteers>(item));
+            var entity = mapper.Map<Volunteers>(item);
+            await repository.UpdateItem(id, entity);
         }
-       
-       
     }
 }
+
+
+

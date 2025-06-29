@@ -22,34 +22,34 @@ namespace MyProject1.Controllers
         }
 
         [HttpGet]
-        public List<UserDto> Get()
+        public async Task<List<UserDto>> Get()
         {
-            return service.GetAll();
+            return await service.GetAllAsync();
         }
 
         [HttpGet("{id}")]
-        public UserDto Get(int id)
+        public async Task<UserDto> Get(int id)
         {
-            return service.GetById(id);
+            return await service.GetByIdAsync(id);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] UserDto user)
+        public async Task<IActionResult> Post([FromBody] UserDto user)
         {
             if (string.IsNullOrEmpty(user.Role))
                 user.Role = "User";
 
-            var createdUser = service.AddItem(user);
+            var createdUser = await service.AddItemAsync(user);
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
-        new Claim(ClaimTypes.Email, createdUser.Gmail),
-        new Claim(ClaimTypes.NameIdentifier, createdUser.Id.ToString()),
-        new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", createdUser.Role ?? "User")
-    };
+                new Claim(ClaimTypes.Email, createdUser.Gmail),
+                new Claim(ClaimTypes.NameIdentifier, createdUser.Id.ToString()),
+                new Claim(ClaimTypes.Role, createdUser.Role ?? "User")
+            };
 
             var token = new JwtSecurityToken(
                 issuer: config["Jwt:Issuer"],
@@ -68,17 +68,18 @@ namespace MyProject1.Controllers
             });
         }
 
-
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] UserDto value)
+        public async Task<IActionResult> Put(int id, [FromBody] UserDto value)
         {
-            service.UpdateItem(id, value);
+            await service.UpdateItemAsync(id, value);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            service.DeleteItem(id);
+            await service.DeleteItemAsync(id);
+            return NoContent();
         }
     }
 }

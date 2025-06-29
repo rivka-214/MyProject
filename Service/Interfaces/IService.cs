@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 namespace Service.Interfaces
 {
-    public interface IService<T>//לוגיקה עסקית
+    public interface IService<T>
     {
-        T GetById(int id);
-        List<T> GetAll();
-        T AddItem(T item);
-        void DeleteItem(int id);
-        void UpdateItem(int id, T item);
+        Task<List<T>> GetAllAsync();
+        Task<T> GetByIdAsync(int id);
+        Task<T> AddItemAsync(T item);
+        Task UpdateItemAsync(int id, T item);
+        Task DeleteItemAsync(int id);
     }
    
+
+
 }

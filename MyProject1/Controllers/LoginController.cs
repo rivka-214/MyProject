@@ -5,10 +5,6 @@ using Service.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-//using BCrypt.Net;
-
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace MyProject1.Controllers
 {
@@ -18,101 +14,65 @@ namespace MyProject1.Controllers
     {
         private readonly IService<UserDto> service;
         private readonly IConfiguration config;
-        // GET: api/<LoginController>
 
         public LoginController(IService<UserDto> service, IConfiguration config)
         {
             this.service = service;
             this.config = config;
         }
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            
-            return new string[] { "value1", "value2" };
-        }
 
-        // GET api/<LoginController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/<LoginController>
+        // רישום משתמש חדש
         [HttpPost]
-        public UserDto Post([FromBody] UserDto value)
+        public async Task<UserDto> Post([FromBody] UserDto value)
         {
-            // הצפנה של הסיסמה לפני השמירה
-           // value.password = BCrypt.Net.BCrypt.HashPassword(value.password);
-
-            return service.AddItem(value);
+            return await service.AddItemAsync(value);
         }
 
-
+        // התחברות משתמש
         [HttpPost("/login")]
-   
-        public IActionResult Login([FromBody] UserLogin value)
+        public async Task<IActionResult> Login([FromBody] UserLogin value)
         {
-            var user = Authenticate(value);
+            var user = await Authenticate(value);
             if (user == null)
-            {
                 return Unauthorized("Invalid credentials");
-            }
 
             var token = Generate(user);
-            return Ok(token);
+            return Ok(new
+            {
+                token,
+                role = user.Role ?? "User"
+            });
         }
-     
 
-
+        // יצירת טוקן JWT
         private string Generate(UserDto user)
         {
-            var securitykey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
-            var credentials = new SigningCredentials(securitykey, SecurityAlgorithms.HmacSha256);
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // מזהה משתמש
-        new Claim(ClaimTypes.Email, user.Gmail),
-        new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", user.Role ?? "User") // התפקיד
-    };
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Gmail),
+                new Claim(ClaimTypes.Role, user.Role ?? "User")
+            };
 
             var token = new JwtSecurityToken(
                 issuer: config["Jwt:Issuer"],
                 audience: config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddYears(10), 
+                expires: DateTime.UtcNow.AddYears(10),
                 signingCredentials: credentials
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-
-
-        //    private UserDto Authenticate(UserDto value)
-        //{
-        //    // חיפוש המשתמש במערכת לפי המייל
-        //    UserDto user = service.GetAll().FirstOrDefault(x => x.Gmail == value.Gmail);
-
-        //    // אם המשתמש נמצא, בודקים אם הסיסמה תואמת
-        //    if (user != null && BCrypt.Net.BCrypt.Verify(value.password, user.password))  // השוואת סיסמאות מוצפנות
-        //    {
-        //        return user;
-        //    }
-
-        //    return null;
-        //}
-        private UserDto Authenticate(UserLogin value)
+        // אימות משתמש
+        private async Task<UserDto?> Authenticate(UserLogin value)
         {
-            UserDto user = service.GetAll().FirstOrDefault(x => x.password == value.password && x.Gmail == value.Gmail);
-            if (user != null)
-                return user;
-            return null;
+            var users = await service.GetAllAsync();
+            return users.FirstOrDefault(x => x.password == value.password && x.Gmail == value.Gmail);
         }
-
-
-
     }
 }

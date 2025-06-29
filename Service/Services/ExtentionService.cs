@@ -22,7 +22,7 @@ namespace Service.Services
             services.AddScoped<IService<CallsDto>, CallService>();
             services.AddScoped<IService<VolunteersDto>, VolunteerService>();
             services.AddScoped<IService<VolunteerCallsDto>, VolunteersCallService>();
-            services.AddScoped<IService<VolunteerCallsDto>, VolunteersCallService>();
+          
             services.AddScoped<IService<UserDto>, UserService>();
             services.AddScoped<IVolunteerLogic, VolunteerLogic>();
             services.AddSingleton<IFirstAidGuideService, FirstAidGuideService>();

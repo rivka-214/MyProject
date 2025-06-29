@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿
+using AutoMapper;
 using Common.Dto;
 using Microsoft.EntityFrameworkCore;
 using Reposetory.Entities;
@@ -42,14 +43,14 @@ namespace Service.Services
                 entity.LocationY = lng;
             }
 
-            volunteerRepo.AddItem(entity);
+            await volunteerRepo.AddItem(entity);
             return mapper.Map<VolunteersDto>(entity);
         }
 
-
-        public List<VolunteersDto> GetNearbyVolunteers(double locationX, double locationY)
+        // קבלת 20 המתנדבים 
+        public async Task<List<VolunteersDto>> GetNearbyVolunteers(double locationX, double locationY)
         {
-            var volunteers = volunteerRepo.GetAll()
+            var volunteers = (await volunteerRepo.GetAll())
                 .Where(v => v.LocationX.HasValue && v.LocationY.HasValue)
                 .ToList();
 
@@ -67,11 +68,11 @@ namespace Service.Services
             return mapper.Map<List<VolunteersDto>>(volunteersWithDistance);
         }
 
-
-        public List<CallsDto> GetNearbyOpenCalls(double locationX, double locationY)
+        // החזרת 20 הקריאות הקרובות למיקום מסויים עם סטטוס פתוח
+        public async Task<List<CallsDto>> GetNearbyOpenCalls(double locationX, double locationY)
         {
-            var calls = callsRepo.GetAll()
-                .Where(c => c.Status == "נפתח")
+            var calls = (await callsRepo.GetAll())
+                .Where(c => c.Status == "נפתחה")
                 .ToList();
 
             var callsWithDistance = calls
@@ -88,6 +89,14 @@ namespace Service.Services
             return mapper.Map<List<CallsDto>>(callsWithDistance);
         }
 
+        public async Task<List<CallsDto>> GetCallsByStatus(string status)
+        {
+            var calls = (await callsRepo.GetAll())
+                .Where(c => c.Status == status)
+                .ToList();
+
+            return mapper.Map<List<CallsDto>>(calls);
+        }
 
         private double Distance(double x1, double y1, double x2, double y2)
         {
@@ -95,6 +104,7 @@ namespace Service.Services
             var dy = y1 - y2;
             return Math.Sqrt(dx * dx + dy * dy);
         }
+
         private async Task<(double lat, double lng)> GetCoordinatesFromAddress(string address)
         {
             var client = new HttpClient();
@@ -111,7 +121,7 @@ namespace Service.Services
                 var location = result.First();
                 return (double.Parse(location.lat), double.Parse(location.lon));
             }
-
+            Console.WriteLine("no found adress");
             return (0, 0); // או אולי תזרוק חריגה או תכתוב לוג
         }
 
@@ -120,16 +130,5 @@ namespace Service.Services
             public string lat { get; set; }
             public string lon { get; set; }
         }
-
-        public List<CallsDto> GetCallsByStatus(string status)
-        {
-            var calls = callsRepo.GetAll()
-                .Where(c => c.Status == status)
-                .ToList();
-
-            return mapper.Map<List<CallsDto>>(calls);
-        }
-
-
     }
 }

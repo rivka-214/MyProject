@@ -1,8 +1,8 @@
 ﻿using Common.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Service.Interfaces;
-using Service.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -17,7 +17,6 @@ namespace MyProject1.Controllers
         private readonly IVolunteerLogic serviceLogic;
         private readonly IConfiguration config;
 
-
         public VolunteerController(IService<VolunteersDto> service, IVolunteerLogic logic, IConfiguration config)
         {
             this.service = service;
@@ -26,36 +25,36 @@ namespace MyProject1.Controllers
         }
 
         [HttpGet]
-        public List<VolunteersDto> Get()
+        public async Task<List<VolunteersDto>> Get()
         {
-            return service.GetAll();
+            return await service.GetAllAsync();
         }
 
         [HttpGet("{id}")]
-        public VolunteersDto Get(int id)
+        public async Task<VolunteersDto> Get(int id)
         {
-            return service.GetById(id);
+            return await service.GetByIdAsync(id);
         }
 
         [HttpGet("nearby")]
-        public IActionResult GetNearby(double locationX, double locationY)
+        public async Task<IActionResult> GetNearby(double locationX, double locationY)
         {
-            var result = serviceLogic.GetNearbyVolunteers(locationX, locationY);
+            var result = await serviceLogic.GetNearbyVolunteers(locationX, locationY);
             return Ok(result);
         }
 
         // ✅ נקודת API חדשה – מחזירה קריאות שקרובות למתנדב
         [HttpGet("nearby-alerts")]
-        public IActionResult GetNearbyAlerts([FromQuery] int id)
+        public async Task<IActionResult> GetNearbyAlerts([FromQuery] int id)
         {
-            var volunteer = service.GetById(id);
+            var volunteer = await service.GetByIdAsync(id);
             if (volunteer == null)
                 return NotFound("מתנדב לא נמצא");
 
             if (volunteer.LocationX == null || volunteer.LocationY == null)
                 return BadRequest("למתנדב אין מיקום");
 
-            var calls = serviceLogic.GetNearbyOpenCalls(volunteer.LocationX.Value, volunteer.LocationY.Value);
+            var calls = await serviceLogic.GetNearbyOpenCalls(volunteer.LocationX.Value, volunteer.LocationY.Value);
             return Ok(calls);
         }
 
@@ -75,13 +74,13 @@ namespace MyProject1.Controllers
             };
 
             var token = new JwtSecurityToken(
-               issuer: config["Jwt:Issuer"],
-               audience: config["Jwt:Audience"],
-               claims: claims,
-            expires: DateTime.UtcNow.AddDays(7),
-               signingCredentials: credentials
-           );
-   
+                issuer: config["Jwt:Issuer"],
+                audience: config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(7),
+                signingCredentials: credentials
+            );
+
             string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
 
             return Ok(new
@@ -92,22 +91,25 @@ namespace MyProject1.Controllers
         }
 
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] VolunteersDto value)
+        [Authorize(Roles = "Volunteer")]
+        public async Task<IActionResult> Put(int id, [FromBody] VolunteersDto value)
         {
-            service.UpdateItem(id, value);
+            await service.UpdateItemAsync(id, value);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            service.DeleteItem(id);
-        }
-        [HttpGet("by-status")]
-        public IActionResult GetCallsByStatus([FromQuery] string status)
-        {
-            var calls = serviceLogic.GetCallsByStatus(status);
-            return Ok(calls);
+            await service.DeleteItemAsync(id);
+            return NoContent();
         }
 
+        [HttpGet("by-status")]
+        public async Task<IActionResult> GetCallsByStatus([FromQuery] string status)
+        {
+            var calls = await serviceLogic.GetCallsByStatus(status);
+            return Ok(calls);
+        }
     }
 }

@@ -17,33 +17,33 @@ namespace Repository.Repositories
             this.context = context;
         }
 
-        public Calls AddItem(Calls item)
+        public async Task<Calls> AddItem(Calls item)
         {
-            this.context.CallsDb.Add(item);
-            this.context.Save();
+            await this.context.CallsDb.AddAsync(item);
+            await this.context.SaveAsync();
             return item;
         }
 
-        public void DeleteItem(int id)
+        public async Task DeleteItem(int id)
         {
-            this.context.CallsDb.Remove(GetById(id));
-            this.context.Save();
+            var call = await GetById(id);
+            this.context.CallsDb.Remove(call);
+            await this.context.SaveAsync();
         }
 
-        public List<Calls> GetAll()
+        public async Task<List<Calls>> GetAll()
         {
-            return this.context.CallsDb.ToList();
+            return await this.context.CallsDb.ToListAsync();
         }
 
-        public Calls GetById(int id)
+        public async Task<Calls> GetById(int id)
         {
-            return context.CallsDb.FirstOrDefault(x => x.Id == id);
-
+            return await context.CallsDb.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public void UpdateItem(int id, Calls item)
+        public async Task UpdateItem(int id, Calls item)
         {
-            var call = GetById(id);
+            var call = await GetById(id);
 
             if (call == null)
                 throw new Exception($"לא נמצאה קריאה עם מזהה {id}");
@@ -53,10 +53,7 @@ namespace Repository.Repositories
             call.SentToHospital = item.SentToHospital;
             call.HospitalName = item.HospitalName;
 
-            context.Save();
+            await context.SaveAsync();
         }
-
-       
     }
 }
-

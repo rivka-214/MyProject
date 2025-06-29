@@ -9,9 +9,8 @@ namespace Service.Interfaces
 {
     public interface ICallService
     {
-        string GetStatus(int callId);
-        void CompleteCall(int id, CompleteCallDto dto);
-        void UpdateStatus(int id, string status);
+        Task<string> GetStatus(int callId);
+        Task CompleteCall(int id, CompleteCallDto dto);
+        Task UpdateStatus(int id, string status);
     }
-
 }

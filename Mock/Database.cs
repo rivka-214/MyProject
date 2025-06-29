@@ -1,7 +1,9 @@
+// Database.cs
 using Microsoft.EntityFrameworkCore;
 using Reposetory.Entities;
 using Repository.Entities;
 using Repository.Interfacese;
+using System.Threading.Tasks;
 
 namespace Mock
 {
@@ -15,6 +17,11 @@ namespace Mock
         public void Save()
         {
             SaveChanges();
+        }
+
+        public async Task SaveAsync()
+        {
+            await SaveChangesAsync();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
