@@ -111,5 +111,12 @@ namespace MyProject1.Controllers
             var calls = await serviceLogic.GetCallsByStatus(status);
             return Ok(calls);
         }
+        [HttpGet("exists")]
+        public async Task<IActionResult> CheckVolunteerExists([FromQuery] string gmail)
+        {
+            var volunteers = await service.GetAllAsync();
+            var exists = volunteers.Any(v => v.Gmail == gmail);
+            return Ok(new { exists });
+        }
     }
 }
