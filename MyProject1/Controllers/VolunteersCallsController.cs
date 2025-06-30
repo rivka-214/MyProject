@@ -10,127 +10,78 @@ namespace MyProject1.Controllers
     [ApiController]
     public class VolunteersCallsController : ControllerBase
     {
-        private readonly IService<VolunteerCallsDto> service;
-        private readonly IVolunteersCallLogic volunteerCallService;
-        private readonly IService<VolunteersDto> volunteerService;
-        private readonly IService<CallsDto> callsService;
+        private readonly IService<VolunteerCallsDto> _service;
+        private readonly IVolunteersCallLogic _volunteerCallLogic;
 
         public VolunteersCallsController(
             IService<VolunteerCallsDto> service,
-            IVolunteersCallLogic volunteerCallService,
-            IService<VolunteersDto> volunteerService,
-            IService<CallsDto> callsService)
+            IVolunteersCallLogic volunteerCallLogic)
         {
-            this.service = service;
-            this.volunteerCallService = volunteerCallService;
-            this.volunteerService = volunteerService;
-            this.callsService = callsService;
+            _service = service;
+            _volunteerCallLogic = volunteerCallLogic;
         }
 
         [HttpGet]
-        public async Task<List<VolunteerCallsDto>> Get()
-        {
-            return await service.GetAllAsync();
-        }
+        public async Task<List<VolunteerCallsDto>> Get() => await _service.GetAllAsync();
 
         [HttpGet("{id}")]
-        public async Task<VolunteerCallsDto> Get(int id)
-        {
-            return await service.GetByIdAsync(id);
-        }
+        public async Task<VolunteerCallsDto> Get(int id) => await _service.GetByIdAsync(id);
 
         [HttpPost]
-        public async Task<VolunteerCallsDto> Post([FromBody] VolunteerCallsDto value)
-        {
-            return await service.AddItemAsync(value);
-        }
+        public async Task<VolunteerCallsDto> Post([FromBody] VolunteerCallsDto value) =>
+            await _service.AddItemAsync(value);
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] VolunteerCallsDto value)
         {
-            await service.UpdateItemAsync(id, value);
+            await _service.UpdateItemAsync(id, value);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await service.DeleteItemAsync(id);
+            await _service.DeleteItemAsync(id);
             return NoContent();
         }
 
         [HttpGet("active/{volunteerId}")]
         public async Task<ActionResult<List<VolunteerCallsDto>>> GetActiveCalls(int volunteerId)
         {
-            try
-            {
-                var activeCalls = await volunteerCallService.GetActiveCallsForVolunteer(volunteerId);
-                return Ok(activeCalls);
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest($"שגיאה בקבלת קריאות פעילות: {ex.Message}");
-            }
+            var result = await _volunteerCallLogic.GetActiveCallsForVolunteer(volunteerId);
+            return Ok(result);
         }
 
         [HttpGet("history/{volunteerId}")]
         public async Task<ActionResult<List<VolunteerCallsDto>>> GetHistoryCalls(int volunteerId)
         {
-            try
-            {
-                var historyCalls = await volunteerCallService.GetHistoryCallsForVolunteer(volunteerId);
-                return Ok(historyCalls);
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest($"שגיאה בקבלת היסטוריית קריאות: {ex.Message}");
-            }
+            var result = await _volunteerCallLogic.GetHistoryCallsForVolunteer(volunteerId);
+            return Ok(result);
         }
 
         [HttpPost("respond")]
         public async Task<ActionResult> RespondToCall([FromBody] VolunteerResponseDto request)
         {
-            try
-            {
-                await volunteerCallService.RespondToCall(request.CallId, request.VolunteerId, request.Response);
-                return Ok(new { message = "תגובה נשמרה בהצלחה" });
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest($"שגיאה בשמירת תגובה: {ex.Message}");
-            }
+            await _volunteerCallLogic.RespondToCall(request.CallId, request.VolunteerId, request.Response);
+            return Ok(new { message = "תגובה נשמרה בהצלחה" });
         }
 
         [HttpPut("{callId}/{volunteerId}/status")]
         public async Task<ActionResult> UpdateVolunteerStatus(int callId, int volunteerId, [FromBody] UpdateVolunteerStatusDto request)
         {
-            try
-            {
-                await volunteerCallService.UpdateVolunteerStatus(callId, volunteerId, request.Status, request.Summary);
-                return Ok(new { message = "סטטוס עודכן בהצלחה" });
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest($"שגיאה בעדכון סטטוס: {ex.Message}");
-            }
+            await _volunteerCallLogic.UpdateVolunteerStatus(callId, volunteerId, request.Status, request.Summary);
+            return Ok(new { message = "סטטוס עודכן בהצלחה" });
         }
 
         [HttpGet("{callId}/info")]
         public async Task<ActionResult<CallVolunteersInfoDto>> GetCallVolunteersInfo(int callId)
         {
-            try
+            var statusMsg = await _volunteerCallLogic.GetCallVolunteersInfo(callId);
+            return Ok(new CallVolunteersInfoDto
             {
-                var info = await volunteerCallService.GetCallVolunteersInfo(callId);
-                return Ok(new CallVolunteersInfoDto
-                {
-                    CallId = callId,
-                    StatusMessage = info
-                });
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest($"שגיאה בקבלת מידע על קריאה: {ex.Message}");
-            }
+                CallId = callId,
+                StatusMessage = statusMsg
+            });
         }
     }
 }

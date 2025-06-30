@@ -12,25 +12,25 @@ namespace MyProject1.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IService<UserDto> service;
-        private readonly IConfiguration config;
+        private readonly IService<UserDto> _service;
+        private readonly IConfiguration _config;
 
         public UserController(IService<UserDto> service, IConfiguration config)
         {
-            this.service = service;
-            this.config = config;
+            _service = service;
+            _config = config;
         }
 
         [HttpGet]
         public async Task<List<UserDto>> Get()
         {
-            return await service.GetAllAsync();
+            return await _service.GetAllAsync();
         }
 
         [HttpGet("{id}")]
         public async Task<UserDto> Get(int id)
         {
-            return await service.GetByIdAsync(id);
+            return await _service.GetByIdAsync(id);
         }
 
         [HttpPost]
@@ -39,9 +39,9 @@ namespace MyProject1.Controllers
             if (string.IsNullOrEmpty(user.Role))
                 user.Role = "User";
 
-            var createdUser = await service.AddItemAsync(user);
+            var createdUser = await _service.AddItemAsync(user);
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -52,8 +52,8 @@ namespace MyProject1.Controllers
             };
 
             var token = new JwtSecurityToken(
-                issuer: config["Jwt:Issuer"],
-                audience: config["Jwt:Audience"],
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddMonths(1),
                 signingCredentials: credentials
@@ -71,15 +71,23 @@ namespace MyProject1.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] UserDto value)
         {
-            await service.UpdateItemAsync(id, value);
+            await _service.UpdateItemAsync(id, value);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await service.DeleteItemAsync(id);
+            await _service.DeleteItemAsync(id);
             return NoContent();
+        }
+
+        [HttpGet("exists")]
+        public async Task<IActionResult> Exists([FromQuery] string gmail)
+        {
+            var users = await _service.GetAllAsync();
+            bool exists = users.Any(u => u.Gmail.Equals(gmail, StringComparison.OrdinalIgnoreCase));
+            return Ok(new { exists });
         }
     }
 }

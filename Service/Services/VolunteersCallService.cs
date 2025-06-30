@@ -1,14 +1,11 @@
 ﻿using AutoMapper;
 using Common.Dto;
-using Microsoft.AspNetCore.Hosting;
 using Reposetory.Entities;
 using Repository.Entities;
 using Repository.Interfacese;
 using Repository.Repositories;
 using Service.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Service.Services
@@ -62,7 +59,6 @@ namespace Service.Services
             await repository.UpdateItem(id, entity);
         }
 
-        // הקצאת 20 מתנדבים קרובים
         public async Task AssignNearbyVolunteersToCall(int callId, double locationX, double locationY)
         {
             var nearbyVolunteers = await volunteerLogic.GetNearbyVolunteers(locationX, locationY);
@@ -72,16 +68,13 @@ namespace Service.Services
                 {
                     CallsId = callId,
                     VolunteerId = volunteer.Id,
-                    VolunteerStatus = "notified" // סטטוס ברירת מחדל
+                    VolunteerStatus = "notified"
                 };
                 var entity = mapper.Map<VolunteerCalls>(newItem);
                 await repository.AddItem(entity);
             }
         }
 
-        /// <summary>
-        /// מחזיר קריאות פעילות למתנדב
-        /// </summary>
         public async Task<List<VolunteerCallsDto>> GetActiveCallsForVolunteer(int volunteerId)
         {
             var repo = repository as VolunteersCallsRepository;
@@ -89,9 +82,6 @@ namespace Service.Services
             return mapper.Map<List<VolunteerCallsDto>>(activeCalls);
         }
 
-        /// <summary>
-        /// מחזיר היסטוריית קריאות למתנדב
-        /// </summary>
         public async Task<List<VolunteerCallsDto>> GetHistoryCallsForVolunteer(int volunteerId)
         {
             var repo = repository as VolunteersCallsRepository;
@@ -99,48 +89,38 @@ namespace Service.Services
             return mapper.Map<List<VolunteerCallsDto>>(historyCalls);
         }
 
-        /// <summary>
-        /// מתנדב מגיב לקריאה (going/cant)
-        /// </summary>
         public async Task RespondToCall(int callId, int volunteerId, string response)
         {
             var repo = repository as VolunteersCallsRepository;
             await repo?.UpdateVolunteerStatus(callId, volunteerId, response);
 
-            // אם מתנדב יצא - בדוק אם צריך לעדכן סטטוס קריאה
             if (response == "going")
             {
-                // הקריאה נשארת "open" עד שמישהו מגיע
+                // קריאה נשארת פתוחה
             }
             else if (response == "arrived")
             {
-                // עדכן סטטוס קריאה ל"in_progress"
                 await callService.UpdateStatus(callId, "in_progress");
             }
         }
 
-        /// <summary>
-        /// עדכון סטטוס מתנדב לקריאה
-        /// </summary>
         public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, string summary = null)
         {
             var repo = repository as VolunteersCallsRepository;
             await repo?.UpdateVolunteerStatus(callId, volunteerId, status);
 
-            // לוגיקה לעדכון סטטוס קריאה
             if (status == "arrived")
             {
                 await callService.UpdateStatus(callId, "in_progress");
             }
             else if (status == "finished")
             {
-                // אם יש סיכום - עדכן גם את הקריאה
                 if (!string.IsNullOrEmpty(summary))
                 {
                     var completeDto = new CompleteCallDto
                     {
                         Summary = summary,
-                        SentToHospital = false // ברירת מחדל
+                        SentToHospital = false
                     };
                     await callService.CompleteCall(callId, completeDto);
                 }
@@ -148,9 +128,6 @@ namespace Service.Services
             }
         }
 
-        /// <summary>
-        /// בדיקה אם צריך לשלוח לעוד מתנדבים
-        /// </summary>
         public async Task<bool> ShouldSendToMoreVolunteers(int callId)
         {
             var repo = repository as VolunteersCallsRepository;
@@ -177,6 +154,5 @@ namespace Service.Services
             else
                 return "ממתין למתנדבים";
         }
-
     }
 }

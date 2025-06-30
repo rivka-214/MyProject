@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Common.Dto;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Mock;
 using Repository.Interfacese;
+using Service.Interfaces;
 using Service.Services;
 using System.Text;
 
@@ -13,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// ✅ Swagger + אבטחה
+// Swagger + אבטחה
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
@@ -33,36 +35,53 @@ builder.Services.AddSwaggerGen(option =>
             {
                 Reference = new OpenApiReference
                 {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
                 }
             },
-            new string[]{}
+            new string[] { }
         }
     });
 });
 
-// ✅ הגדרת CORS ל-React
+// הגדרת CORS ל-React
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
         policy.WithOrigins(
-    "http://localhost:3001",
-    "http://localhost:3000",
-    "http://localhost:3004"
-)
-.AllowAnyMethod()
-.AllowAnyHeader();
+            "http://localhost:3001",
+            "http://localhost:3000",
+            "http://localhost:3004"
+        )
+        .AllowAnyMethod()
+        .AllowAnyHeader();
     });
 });
 
-// שירותים
+// שירותים - הוספת DbContext
 builder.Services.AddDbContext<IContext, Database>();
+
+// AutoMapper
 builder.Services.AddAutoMapper(typeof(MyMapper));
+
+// רישום VolunteersCallService כ- IVolunteersCallLogic ו- IService<VolunteerCallsDto>
+builder.Services.AddScoped<VolunteersCallService>();
+builder.Services.AddScoped<IVolunteersCallLogic>(sp => sp.GetRequiredService<VolunteersCallService>());
+builder.Services.AddScoped<IService<VolunteerCallsDto>>(sp => sp.GetRequiredService<VolunteersCallService>());
+
+// שבירת תלות מעגלית ב-CallService עם Func<IVolunteersCallLogic>
+builder.Services.AddScoped<Func<IVolunteersCallLogic>>(sp => () => sp.GetRequiredService<IVolunteersCallLogic>());
+
+// רישום CallService
+builder.Services.AddScoped<ICallService, CallService>();
+builder.Services.AddScoped<IService<CallsDto>>(sp => (IService<CallsDto>)sp.GetRequiredService<ICallService>());
+
+// הוספת שירותים כלליים
 builder.Services.AddServices();
 builder.Services.AddSignalR();
-// JWT
+
+// JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(option =>
     {
@@ -90,7 +109,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ✅ הפעלת CORS
+// הפעלת CORS
 app.UseCors("AllowReactApp");
 
 app.UseAuthentication();

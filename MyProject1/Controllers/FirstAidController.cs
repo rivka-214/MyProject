@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Common.Dto;
+using Service.Interfaces;
 using Service.Services;
 
 namespace MyProject1.Controllers
