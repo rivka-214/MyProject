@@ -1,17 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Reposetory.Entities;
 using Repository.Interfacese;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Repository.Repositories
 {
-    public class CallsRepository : IRepository<Calls>
+    public class CallsRepository : ICallsRepository
     {
         private readonly IContext context;
+
         public CallsRepository(IContext context)
         {
             this.context = context;
@@ -54,6 +53,13 @@ namespace Repository.Repositories
             call.HospitalName = item.HospitalName;
 
             await context.SaveAsync();
+        }
+
+        public async Task<List<Calls>> GetCallsByUserId(int userId)
+        {
+            return await context.CallsDb
+                                .Where(c => c.UserId == userId)
+                                .ToListAsync();
         }
     }
 }

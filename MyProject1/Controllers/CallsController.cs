@@ -2,6 +2,7 @@ using Common.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
+using System.Security.Claims;
 
 namespace MyProject1.Controllers
 {
@@ -81,6 +82,25 @@ namespace MyProject1.Controllers
         {
             await callService.CompleteCall(id, dto);
             return Ok("הקריאה עודכנה בהצלחה");
+        }
+
+        [HttpGet("by-user")]
+        [Authorize]
+        public async Task<ActionResult<List<CallsDto>>> GetCallsByUser()
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            Console.WriteLine($"UserId from token: {userIdStr}");
+
+            if (!int.TryParse(userIdStr, out int userId))
+            {
+                Console.WriteLine("Invalid UserId in token");
+                return Unauthorized();
+            }
+
+            var calls = await callService.GetCallsByUserId(userId);
+            Console.WriteLine($"Found {calls.Count} calls for user.");
+
+            return Ok(calls);
         }
     }
 }

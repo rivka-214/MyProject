@@ -13,18 +13,19 @@ namespace Service.Services
 {
     public class CallService : IService<CallsDto>, ICallService
     {
-        private readonly IRepository<Calls> repository;
+        private readonly ICallsRepository repository;  // שינוי כאן
         private readonly IMapper mapper;
         private readonly Func<IVolunteersCallLogic> logicFactory;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        // גישה ל-logic לפי בקשה, למנוע תלות מעגלית
         private IVolunteersCallLogic Logic => logicFactory();
 
-        public CallService(IRepository<Calls> repository, IMapper mapper, Func<IVolunteersCallLogic> logicFactory)
+        public CallService(ICallsRepository repository, IMapper mapper, Func<IVolunteersCallLogic> logicFactory, IHttpContextAccessor httpContextAccessor)
         {
             this.repository = repository;
             this.mapper = mapper;
             this.logicFactory = logicFactory;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<CallsDto> AddItemAsync(CallsDto item)
@@ -84,20 +85,45 @@ namespace Service.Services
             call.HospitalName = dto.SentToHospital ? dto.HospitalName : null;
             await repository.UpdateItem(id, call);
         }
-
+        public async Task<List<CallsDto>> GetCallsByUserId(int userId)
+        {
+            var userCalls = await repository.GetCallsByUserId(userId);
+            Console.WriteLine($"User calls count: {userCalls.Count}");
+            return mapper.Map<List<CallsDto>>(userCalls);
+        }
         public async Task<CallsDto> CreateCallAsync(CallsDto call)
         {
+            // העלאת תמונה אם קיימת
             if (call.FileImage != null)
             {
                 var filePath = await UploadImage(call.FileImage);
-                // כאן אפשר לשמור את filePath אם צריך
+                Console.WriteLine($"📷 Image uploaded to: {filePath}");
             }
 
-            call.Status = "נפתחה";
-            var savedCall = await AddItemAsync(call);
+            // שליפת מזהה משתמש מתוך JWT
+            var httpContext = _httpContextAccessor.HttpContext;
+            var userIdStr = httpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
+            if (!int.TryParse(userIdStr, out int userId))
+            {
+                Console.WriteLine("❌ לא הצלחנו לשלוף מזהה משתמש מה־JWT");
+                throw new UnauthorizedAccessException("מזהה משתמש לא תקין ב־JWT");
+            }
+
+            Console.WriteLine($"✅ User ID from token: {userId}");
+            call.UserId = userId;
+
+            // מצב ברירת מחדל
+            call.Status = "נפתחה";
+
+            // שמירת הקריאה בבסיס הנתונים
+            var savedCall = await AddItemAsync(call);
+            Console.WriteLine($"📦 Call saved to DB with ID: {savedCall.Id}");
+
+            // הקצאת מתנדבים אם יש מיקום
             if (call.LocationX != 0 && call.LocationY != 0)
             {
+                Console.WriteLine($"📍 Assigning volunteers near location: {call.LocationX}, {call.LocationY}");
                 await Logic.AssignNearbyVolunteersToCall(savedCall.Id, call.LocationX, call.LocationY);
             }
 

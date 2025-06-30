@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Mock;
 using Repository.Interfacese;
+using Repository.Repositories;
 using Service.Interfaces;
 using Service.Services;
 using System.Text;
@@ -15,19 +16,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Swagger + אבטחה
+// Swagger + JWT Security
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
+
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
+        Description = "Enter JWT token",
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
         Scheme = "Bearer"
     });
+
     option.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -39,53 +42,52 @@ builder.Services.AddSwaggerGen(option =>
                     Id = "Bearer"
                 }
             },
-            new string[] { }
+            new string[] {}
         }
     });
 });
 
-// הגדרת CORS ל-React
+// ✅ CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins(
-            "http://localhost:3001",
-            "http://localhost:3000",
-            "http://localhost:3004"
-        )
-        .AllowAnyMethod()
-        .AllowAnyHeader();
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
-// שירותים - הוספת DbContext
+// ✅ Register IHttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
+// ✅ Add DB context (mocked)
 builder.Services.AddDbContext<IContext, Database>();
 
-// AutoMapper
+// ✅ AutoMapper
 builder.Services.AddAutoMapper(typeof(MyMapper));
 
-// רישום VolunteersCallService כ- IVolunteersCallLogic ו- IService<VolunteerCallsDto>
+// ✅ VolunteersCallService - Multi-Interface registration
 builder.Services.AddScoped<VolunteersCallService>();
 builder.Services.AddScoped<IVolunteersCallLogic>(sp => sp.GetRequiredService<VolunteersCallService>());
 builder.Services.AddScoped<IService<VolunteerCallsDto>>(sp => sp.GetRequiredService<VolunteersCallService>());
-
-// שבירת תלות מעגלית ב-CallService עם Func<IVolunteersCallLogic>
+builder.Services.AddScoped<ICallsRepository, CallsRepository>();
+builder.Services.AddScoped<ICallService, CallService>();
+// ✅ CallService - with Func for circular dependency
 builder.Services.AddScoped<Func<IVolunteersCallLogic>>(sp => () => sp.GetRequiredService<IVolunteersCallLogic>());
-
-// רישום CallService
 builder.Services.AddScoped<ICallService, CallService>();
 builder.Services.AddScoped<IService<CallsDto>>(sp => (IService<CallsDto>)sp.GetRequiredService<ICallService>());
 
-// הוספת שירותים כלליים
+// ✅ Add general services (optional)
 builder.Services.AddServices();
 builder.Services.AddSignalR();
+builder.Services.AddHttpContextAccessor();
 
-// JWT Authentication
+// ✅ JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(option =>
+    .AddJwtBearer(options =>
     {
-        option.TokenValidationParameters = new TokenValidationParameters
+        options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
@@ -109,13 +111,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// הפעלת CORS
+// ✅ Enable CORS
 app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-//app.MapHub<VolunteersHub>("/volunteersHub");
+// app.MapHub<VolunteersHub>("/volunteersHub"); // Uncomment if using SignalR
 
 app.Run();

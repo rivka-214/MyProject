@@ -14,6 +14,6 @@ namespace Service.Interfaces
         Task UpdateStatus(int id, string status);
 
         Task<CallsDto> CreateCallAsync(CallsDto call);
-
+        Task<List<CallsDto>> GetCallsByUserId(int userId);
     }
 }
