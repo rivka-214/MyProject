@@ -66,7 +66,8 @@ builder.Services.AddDbContext<IContext, Database>();
 
 // ✅ AutoMapper
 builder.Services.AddAutoMapper(typeof(MyMapper));
-
+builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
+builder.Services.AddScoped<IFirstAidGuideService, FirstAidGuideService>();
 // ✅ VolunteersCallService - Multi-Interface registration
 builder.Services.AddScoped<VolunteersCallService>();
 builder.Services.AddScoped<IVolunteersCallLogic>(sp => sp.GetRequiredService<VolunteersCallService>());
@@ -100,6 +101,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+
+// Load appsettings.Development.json
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
+
+// Add services to the container.
+builder.Services.AddControllers();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
