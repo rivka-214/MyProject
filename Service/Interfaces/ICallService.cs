@@ -13,7 +13,7 @@ namespace Service.Interfaces
     {
         Task<string> GetStatus(int callId);
        
-        Task CompleteCall(int id, CompleteCallDto dto);
+     
         Task UpdateStatus(int id, string status);
 
         Task CompleteCall(int id, CompleteCallDto dto, int volunteerId);

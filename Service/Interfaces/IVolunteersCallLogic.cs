@@ -26,6 +26,6 @@ namespace Service.Interfaces
         Task<List<VolunteerCallsDto>> GetActiveCallsForVolunteer(int volunteerId); // הוספה
         Task<List<VolunteerCallsDto>> GetHistoryCallsForVolunteer(int volunteerId); // הוספה
         public Task CheckAndReassignVolunteers();
-        Task<string> GetCallVolunteersInfo(int callId);
+        //Task<string> GetCallVolunteersInfo(int callId);
     }
 }
