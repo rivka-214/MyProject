@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Service.Interfaces
 {
     public interface ICallService:IService<CallsDto>
-    public interface ICallService
+   
     {
         Task<string> GetStatus(int callId);
        
