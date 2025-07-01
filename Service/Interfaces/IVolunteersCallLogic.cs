@@ -11,11 +11,10 @@ namespace Service.Interfaces
     {
         Task<List<VolunteerCallsDto>> GetActiveCallsForVolunteer(int volunteerId);
         Task<List<VolunteerCallsDto>> GetHistoryCallsForVolunteer(int volunteerId);
-        Task RespondToCall(int callId, int volunteerId, string response);
-        Task UpdateVolunteerStatus(int callId, int volunteerId, string status, string summary = null);
+       
         Task AssignNearbyVolunteersToCall(int callId, double locationX, double locationY);
         Task RespondToCall(int callId, int volunteerId, string response, int currentVolunteerId);
-        //Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId, string summary = null);
+        Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId, string summary = null);
         Task<bool> ShouldSendToMoreVolunteers(int callId);
         Task<CallVolunteersInfoDto> GetCallVolunteersInfo(int callId); // תיקון חתימה
       

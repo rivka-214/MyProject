@@ -263,15 +263,6 @@ namespace Service.Services
                 }
             }
         }
-
-        public Task RespondToCall(int callId, int volunteerId, string response)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateVolunteerStatus(int callId, int volunteerId, string status, string summary = null)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }

@@ -5,7 +5,7 @@ using Service.Services;
 
 [ApiController]
 [Route("api/[controller]")]
-    [ApiController]
+  
 public class FirstAidController : ControllerBase
 {
     private readonly IFirstAidGuideService _guideService;
