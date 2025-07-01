@@ -15,7 +15,7 @@ namespace Service.Interfaces
         Task UpdateVolunteerStatus(int callId, int volunteerId, string status, string summary = null);
         Task AssignNearbyVolunteersToCall(int callId, double locationX, double locationY);
         Task RespondToCall(int callId, int volunteerId, string response, int currentVolunteerId);
-        Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId, string summary = null);
+        //Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId, string summary = null);
         Task<bool> ShouldSendToMoreVolunteers(int callId);
         Task<CallVolunteersInfoDto> GetCallVolunteersInfo(int callId); // תיקון חתימה
       
@@ -23,8 +23,7 @@ namespace Service.Interfaces
         Task<int> GetGoingVolunteersCount(int callId);
         Task<bool> HasArrivedVolunteer(int callId);
         Task<VolunteerCallsDto> GetVolunteerCall(int callId, int volunteerId);
-        Task<List<VolunteerCallsDto>> GetActiveCallsForVolunteer(int volunteerId); // הוספה
-        Task<List<VolunteerCallsDto>> GetHistoryCallsForVolunteer(int volunteerId); // הוספה
+      
         public Task CheckAndReassignVolunteers();
         //Task<string> GetCallVolunteersInfo(int callId);
     }

@@ -27,13 +27,7 @@ namespace Repository.Repositories
         }
         
 
-        public async Task<VolunteerCalls> AddItem(VolunteerCalls item)
-        {
-            await this.context.VolunteerCallsDb.AddAsync(item);
-            await this.context.SaveAsync();
-            return item;
-        }
-
+      
         public async Task DeleteItem(int id)
         {
             var volunteerCall = await GetById(id);
@@ -41,33 +35,26 @@ namespace Repository.Repositories
             await this.context.SaveAsync();
         }
 
-        public async Task DeleteItem(int id)
+    
         public async Task<List<VolunteerCalls>> GetAll()
         {
             var volunteerCall = await GetById(id);
             this.context.VolunteerCallsDb.Remove(volunteerCall);
             await this.context.SaveAsync();
         }
-            return await this.context.VolunteerCallsDb.ToListAsync();
-        }
+       
 
        
-        public async Task<List<VolunteerCalls>> GetAll()
-        {
-            return await this.context.VolunteerCallsDb.ToListAsync();
+      
         public async Task<VolunteerCalls> GetById(int id)
         {
             return await context.VolunteerCallsDb.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<VolunteerCalls> GetById(int id)
-        {
-            return await context.VolunteerCallsDb.FirstOrDefaultAsync(x => x.Id == id);
-        }
-     
+      
 
 
-        public async Task UpdateItem(int id, VolunteerCalls item)
+      
         public async Task UpdateItem(int id, VolunteerCalls item)
         {
             var volunteerCall = await GetById(id);
