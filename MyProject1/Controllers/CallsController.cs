@@ -17,15 +17,14 @@ namespace MyProject1.Controllers
         private readonly IService<CallsDto> service;
         private readonly IVolunteersCallLogic logic;
         private readonly ICallService callService;
-
-        public CallsController(ICallService callService, IService<CallsDto> service)
+         
         public CallsController(IService<CallsDto> service, IVolunteersCallLogic logic, ICallService callService)
         {
             _callService = callService;
             _service = service;
             this.service = service;
             this.logic = logic;
-            this.callService = callService;
+            this.callService = callService; 
         }
 
         // GET: api/Calls
