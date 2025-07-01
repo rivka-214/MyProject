@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mock;
 
@@ -11,9 +12,11 @@ using Mock;
 namespace Mock.Migrations
 {
     [DbContext(typeof(Database))]
-    partial class DatabaseModelSnapshot : ModelSnapshot
+    [Migration("20250630171253_AddUserIdColumnOnly")]
+    partial class AddUserIdColumnOnly
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,12 +63,9 @@ namespace Mock.Migrations
                     b.Property<int?>("UrgencyLevel")
                         .HasColumnType("int");
 
-<<<<<<< HEAD
-=======
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
->>>>>>> 97d9a2456c204ee850bb277fa46a5749c53d24c1
                     b.Property<int>("numVolanteer")
                         .HasColumnType("int");
 
@@ -187,8 +187,6 @@ namespace Mock.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UsersDb");
-<<<<<<< HEAD
-=======
                 });
 
             modelBuilder.Entity("Reposetory.Entities.Calls", b =>
@@ -200,7 +198,6 @@ namespace Mock.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
->>>>>>> 97d9a2456c204ee850bb277fa46a5749c53d24c1
                 });
 
             modelBuilder.Entity("Reposetory.Entities.VolunteerCalls", b =>

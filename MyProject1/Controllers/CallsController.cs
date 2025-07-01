@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace MyProject1.Controllers
 {
@@ -13,11 +14,18 @@ namespace MyProject1.Controllers
     {
         private readonly ICallService _callService;
         private readonly IService<CallsDto> _service;
+        private readonly IService<CallsDto> service;
+        private readonly IVolunteersCallLogic logic;
+        private readonly ICallService callService;
 
         public CallsController(ICallService callService, IService<CallsDto> service)
+        public CallsController(IService<CallsDto> service, IVolunteersCallLogic logic, ICallService callService)
         {
             _callService = callService;
             _service = service;
+            this.service = service;
+            this.logic = logic;
+            this.callService = callService;
         }
 
         // GET: api/Calls
@@ -34,6 +42,8 @@ namespace MyProject1.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+        [Authorize]
+        public async Task<List<CallsDto>> Get() => await service.GetAllAsync();
 
         // GET: api/Calls/5
         [HttpGet("{id}")]
@@ -51,16 +61,21 @@ namespace MyProject1.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+        [Authorize]
+        public async Task<CallsDto> Get(int id) => await service.GetByIdAsync(id);
 
         // POST: api/Calls
         [HttpPost]
         public async Task<ActionResult<CallsDto>> Post([FromForm] CallsDto call)
+        [Authorize]
+        public async Task<CallsDto> Post([FromForm] CallsDto call)
         {
             try
             {
                 var savedCall = await _callService.AddCallAsync(call, Request.Form.Files.FirstOrDefault());
                 return Ok(savedCall);
-            }
+            return await callService.CreateCallAsync(call);
+        }
             catch (System.Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
@@ -70,6 +85,8 @@ namespace MyProject1.Controllers
         // PUT: api/Calls/5
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, [FromBody] CallsDto value)
+        [Authorize]
+        public async Task Put(int id, [FromBody] CallsDto value)
         {
             try
             {
@@ -79,7 +96,8 @@ namespace MyProject1.Controllers
 
                 await _service.UpdateItemAsync(id, value);
                 return NoContent();
-            }
+            await service.UpdateItemAsync(id, value);
+        }
             catch (System.Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
@@ -100,9 +118,12 @@ namespace MyProject1.Controllers
                 return NoContent();
             }
             catch (System.Exception ex)
-            {
+        [Authorize]
+        public async Task Delete(int id)
+        {
                 return BadRequest(new { error = ex.Message });
             }
+            await service.DeleteItemAsync(id);
         }
 
         // GET: api/Calls/status/5
@@ -110,10 +131,15 @@ namespace MyProject1.Controllers
         public async Task<ActionResult<string>> GetCallStatus(int id)
         {
             try
-            {
+        public async Task<IActionResult> GetCallStatus(int id)
+        {
                 var status = await _callService.GetCallStatusWithVolunteersInfo(id);
-                return Ok(new { status });
-            }
+            var status = await callService.GetStatus(id);
+            if (status == null)
+                return NotFound(new { error = "קריאה לא נמצאה" });
+
+            return Ok(new { status });
+        }
             catch (System.Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
@@ -130,9 +156,13 @@ namespace MyProject1.Controllers
                 return Ok(new { message = "מתנדבים הוקצו בהצלחה" });
             }
             catch (System.Exception ex)
-            {
+        [Authorize]
+        public async Task<IActionResult> AssignNearbyVolunteers(int callId, [FromQuery] double locationX, [FromQuery] double locationY)
+        {
                 return BadRequest(new { error = ex.Message });
             }
+            await logic.AssignNearbyVolunteersToCall(callId, locationX, locationY);
+            return Ok("מתנדבים הוקצו בהצלחה");
         }
 
         // PUT: api/Calls/5/status
@@ -140,10 +170,13 @@ namespace MyProject1.Controllers
         public async Task<ActionResult> UpdateStatus(int id, [FromBody] StatusDto statusDto)
         {
             try
-            {
+        [Authorize]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] StatusDto statusDto)
+        {
                 await _callService.UpdateStatus(id, statusDto.Status);
-                return Ok();
-            }
+            await callService.UpdateStatus(id, statusDto.Status);
+            return Ok();
+        }
             catch (System.Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
@@ -156,15 +189,35 @@ namespace MyProject1.Controllers
         public async Task<ActionResult> CompleteCall(int id, [FromBody] CompleteCallDto dto)
         {
             try
-            {
+        [Authorize]
+        public async Task<IActionResult> CompleteCall(int id, [FromBody] CompleteCallDto dto)
+        {
                 var volunteerId = int.Parse(User.FindFirst("id")?.Value);
                 await _callService.CompleteCall(id, dto, volunteerId);
                 return Ok(new { message = "הקריאה עודכנה בהצלחה" });
-            }
+            await callService.CompleteCall(id, dto);
+            return Ok("הקריאה עודכנה בהצלחה");
+        }
             catch (System.Exception ex)
+
+        [HttpGet("by-user")]
+        [Authorize]
+        public async Task<ActionResult<List<CallsDto>>> GetCallsByUser()
+        {
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            Console.WriteLine($"UserId from token: {userIdStr}");
+
+            if (!int.TryParse(userIdStr, out int userId))
             {
                 return BadRequest(new { error = ex.Message });
+                Console.WriteLine("Invalid UserId in token");
+                return Unauthorized();
             }
+
+            var calls = await callService.GetCallsByUserId(userId);
+            Console.WriteLine($"Found {calls.Count} calls for user.");
+
+            return Ok(calls);
         }
     }
 }

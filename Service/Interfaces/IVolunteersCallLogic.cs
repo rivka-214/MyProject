@@ -1,10 +1,18 @@
 ﻿using Common.Dto;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Service.Interfaces
 {
     public interface IVolunteersCallLogic
     {
+        Task<List<VolunteerCallsDto>> GetActiveCallsForVolunteer(int volunteerId);
+        Task<List<VolunteerCallsDto>> GetHistoryCallsForVolunteer(int volunteerId);
+        Task RespondToCall(int callId, int volunteerId, string response);
+        Task UpdateVolunteerStatus(int callId, int volunteerId, string status, string summary = null);
         Task AssignNearbyVolunteersToCall(int callId, double locationX, double locationY);
         Task RespondToCall(int callId, int volunteerId, string response, int currentVolunteerId);
         Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId, string summary = null);
@@ -18,5 +26,6 @@ namespace Service.Interfaces
         Task<List<VolunteerCallsDto>> GetActiveCallsForVolunteer(int volunteerId); // הוספה
         Task<List<VolunteerCallsDto>> GetHistoryCallsForVolunteer(int volunteerId); // הוספה
         public Task CheckAndReassignVolunteers();
+        Task<string> GetCallVolunteersInfo(int callId);
     }
 }

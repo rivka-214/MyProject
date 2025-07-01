@@ -39,7 +39,8 @@ namespace Common.Dto
         public string Summary { get; set; } = string.Empty;
         public bool SentToHospital { get; set; }
         public string? HospitalName { get; set; }
-
+        // ✅ חדש:
+        public int UserId { get; set; }
 
     }
 }

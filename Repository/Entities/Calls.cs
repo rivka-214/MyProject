@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Repository.Entities;
 
 namespace Reposetory.Entities
 {
@@ -26,7 +27,9 @@ namespace Reposetory.Entities
         public bool? SentToHospital { get; set; }
         public string? HospitalName { get; set; }
         public DateTime? Date { get; set; }
-     
+        public int? UserId { get; set; }
+        public User User { get; set; }
+
 
 
         public List<VolunteerCalls> VolunteerCalls { get; set; } = new List<VolunteerCalls>();
