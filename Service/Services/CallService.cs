@@ -5,13 +5,12 @@ using Common.Dto;
 using Microsoft.AspNetCore.Http;
 using Reposetory.Entities;
 using Repository.Interfacese;
+using Repository.Repositories;
 using Service.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Common.Dto;
-using Microsoft.AspNetCore.Http;
 
 
 namespace Service.Services
@@ -22,6 +21,11 @@ namespace Service.Services
         private readonly ICallsRepository repository;  // שינוי כאן
         private readonly IMapper mapper;
         private readonly IVolunteersCallLogic _volunteerCallLogic;
+        private readonly Func<IVolunteersCallLogic> logicFactory;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        private IVolunteersCallLogic Logic => logicFactory();
+
         public CallService(IRepository<Calls> repository, IMapper mapper, IVolunteersCallLogic volunteerCallLogic)
         private readonly Func<IVolunteersCallLogic> logicFactory;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -170,6 +174,12 @@ namespace Service.Services
             var volunteersInfo = await _volunteerCallLogic.GetCallVolunteersInfo(id);
             return $"סטטוס: {call.Status}, מידע מתנדבים: {volunteersInfo.StatusMessage}";
         }
+        public async Task<List<CallsDto>> GetCallsByUserId(int userId)
+        {
+            var userCalls = await CallRepository.GetCallsByUserId(userId);
+            Console.WriteLine($"User calls count: {userCalls.Count}");
+            return mapper.Map<List<CallsDto>>(userCalls);
+        }
         public async Task<CallsDto> AddCallAsync(CallsDto call, IFormFile file)
         {
             if (file != null)
@@ -231,8 +241,39 @@ namespace Service.Services
                 await Logic.AssignNearbyVolunteersToCall(savedCall.Id, call.LocationX, call.LocationY);
             }
 
+            Console.WriteLine($"✅ User ID from token: {userId}");
+            call.UserId = userId;
+
+            // מצב ברירת מחדל
+            call.Status = "נפתחה";
+
+            // שמירת הקריאה בבסיס הנתונים
+            var savedCall = await AddItemAsync(call);
+            Console.WriteLine($"📦 Call saved to DB with ID: {savedCall.Id}");
+
+            // הקצאת מתנדבים אם יש מיקום
+            if (call.LocationX != 0 && call.LocationY != 0)
+            {
+                Console.WriteLine($"📍 Assigning volunteers near location: {call.LocationX}, {call.LocationY}");
+                await Logic.AssignNearbyVolunteersToCall(savedCall.Id, call.LocationX, call.LocationY);
+            }
+
             return savedCall;
         }
+        private async Task<string> UploadImage(IFormFile file)
+        {
+            var folderPath = Path.Combine(Environment.CurrentDirectory, "Images");
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            var filePath = Path.Combine(folderPath, file.FileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            return filePath;
+        }
+
 
         public async Task AssignNearbyVolunteersToCall(int callId, double locationX, double locationY)
         {
