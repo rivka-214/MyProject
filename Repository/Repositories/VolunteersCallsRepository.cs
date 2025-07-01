@@ -25,6 +25,7 @@ namespace Repository.Repositories
             await this.context.SaveAsync();
             return item;
         }
+        
 
         public async Task DeleteItem(int id)
         {
@@ -33,6 +34,7 @@ namespace Repository.Repositories
             await this.context.SaveAsync();
         }
 
+       
         public async Task<List<VolunteerCalls>> GetAll()
         {
             return await this.context.VolunteerCallsDb.ToListAsync();
@@ -42,6 +44,8 @@ namespace Repository.Repositories
         {
             return await context.VolunteerCallsDb.FirstOrDefaultAsync(x => x.Id == id);
         }
+     
+
 
         public async Task UpdateItem(int id, VolunteerCalls item)
         {
@@ -54,15 +58,19 @@ namespace Repository.Repositories
             }
         }
 
+      
+
+      
+
         /// <summary>
         /// מחזיר קריאות פעילות למתנדב ספציפי (going, arrived)
         /// </summary>
+
         public async Task<List<VolunteerCalls>> GetActiveCallsForVolunteer(int volunteerId)
         {
             return await context.VolunteerCallsDb
+                .Where(vc => vc.VolunteerId == volunteerId && vc.VolunteerStatus != "cant" && vc.VolunteerStatus != "finished")
                 .Include(vc => vc.Calls)
-                .Where(vc => vc.VolunteerId == volunteerId &&
-                           (vc.VolunteerStatus == "going" || vc.VolunteerStatus == "arrived"))
                 .ToListAsync();
         }
 
@@ -72,31 +80,26 @@ namespace Repository.Repositories
         public async Task<List<VolunteerCalls>> GetHistoryCallsForVolunteer(int volunteerId)
         {
             return await context.VolunteerCallsDb
+                .Where(vc => vc.VolunteerId == volunteerId && vc.VolunteerStatus == "finished")
                 .Include(vc => vc.Calls)
-                .Where(vc => vc.VolunteerId == volunteerId &&
-                           (vc.VolunteerStatus == "finished" || vc.VolunteerStatus == "cant"))
                 .ToListAsync();
         }
-
         /// <summary>
         /// מחזיר קריאה ספציפית של מתנדב
         /// </summary>
-        public async Task<VolunteerCalls> GetByCallAndVolunteer(int callId, int volunteerId)
-        {
-            return await context.VolunteerCallsDb
-                .FirstOrDefaultAsync(vc => vc.CallsId == callId && vc.VolunteerId == volunteerId);
-        }
+
 
         /// <summary>
         /// מעדכן סטטוס מתנדב לקריאה ספציפית
         /// </summary>
+     
         public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status)
         {
-            var volunteerCall = await GetByCallAndVolunteer(callId, volunteerId);
-            if (volunteerCall != null)
+            var call = await GetVolunteerCall(callId, volunteerId);
+            if (call != null)
             {
-                volunteerCall.VolunteerStatus = status;
-                volunteerCall.ResponseTime = DateTime.Now;
+                call.VolunteerStatus = status;
+                call.ResponseTime = DateTime.UtcNow;
                 await context.SaveAsync();
             }
         }
@@ -110,6 +113,7 @@ namespace Repository.Repositories
                 .CountAsync(vc => vc.CallsId == callId && vc.VolunteerStatus == "going");
         }
 
+
         /// <summary>
         /// בדיקה אם יש מתנדב שהגיע לקריאה
         /// </summary>
@@ -118,5 +122,15 @@ namespace Repository.Repositories
             return await context.VolunteerCallsDb
                 .AnyAsync(vc => vc.CallsId == callId && vc.VolunteerStatus == "arrived");
         }
+
+        public async Task<VolunteerCalls> GetVolunteerCall(int callId, int volunteerId)
+        {
+            return await context.VolunteerCallsDb
+                .FirstOrDefaultAsync(vc => vc.CallsId == callId && vc.VolunteerId == volunteerId);
+        }
+
+       
     }
 }
+    
+

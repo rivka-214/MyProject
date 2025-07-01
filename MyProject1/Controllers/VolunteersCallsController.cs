@@ -1,4 +1,5 @@
 ﻿using Common.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
 using System.Collections.Generic;
@@ -8,55 +9,84 @@ namespace MyProject1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Volunteer")]
     public class VolunteersCallsController : ControllerBase
     {
-        private readonly IService<VolunteerCallsDto> service;
-        private readonly IVolunteersCallLogic volunteerCallService;
-        private readonly IService<VolunteersDto> volunteerService;
-        private readonly IService<CallsDto> callsService;
+        private readonly IService<VolunteerCallsDto> _service;
+        private readonly IVolunteersCallLogic _volunteerCallService;
 
         public VolunteersCallsController(
             IService<VolunteerCallsDto> service,
-            IVolunteersCallLogic volunteerCallService,
-            IService<VolunteersDto> volunteerService,
-            IService<CallsDto> callsService)
+            IVolunteersCallLogic volunteerCallService)
         {
-            this.service = service;
-            this.volunteerCallService = volunteerCallService;
-            this.volunteerService = volunteerService;
-            this.callsService = callsService;
+            _service = service;
+            _volunteerCallService = volunteerCallService;
         }
 
         [HttpGet]
-        public async Task<List<VolunteerCallsDto>> Get()
+        public async Task<ActionResult<List<VolunteerCallsDto>>> Get()
         {
-            return await service.GetAllAsync();
+            var calls = await _service.GetAllAsync();
+            return Ok(calls);
         }
 
         [HttpGet("{id}")]
-        public async Task<VolunteerCallsDto> Get(int id)
+        public async Task<ActionResult<VolunteerCallsDto>> Get(int id)
         {
-            return await service.GetByIdAsync(id);
+            var call = await _service.GetByIdAsync(id);
+            if (call == null)
+                return NotFound(new { error = "קריאה לא נמצאה" });
+            return Ok(call);
         }
 
         [HttpPost]
-        public async Task<VolunteerCallsDto> Post([FromBody] VolunteerCallsDto value)
+        public async Task<ActionResult<VolunteerCallsDto>> Post([FromBody] VolunteerCallsDto value)
         {
-            return await service.AddItemAsync(value);
+            try
+            {
+                var created = await _service.AddItemAsync(value);
+                return Ok(created);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] VolunteerCallsDto value)
+        public async Task<ActionResult> Put(int id, [FromBody] VolunteerCallsDto value)
         {
-            await service.UpdateItemAsync(id, value);
-            return NoContent();
+            try
+            {
+                var existing = await _service.GetByIdAsync(id);
+                if (existing == null)
+                    return NotFound(new { error = "קריאה לא נמצאה" });
+
+                await _service.UpdateItemAsync(id, value);
+                return NoContent();
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            await service.DeleteItemAsync(id);
-            return NoContent();
+            try
+            {
+                var existing = await _service.GetByIdAsync(id);
+                if (existing == null)
+                    return NotFound(new { error = "קריאה לא נמצאה" });
+
+                await _service.DeleteItemAsync(id);
+                return NoContent();
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         [HttpGet("active/{volunteerId}")]
@@ -64,12 +94,12 @@ namespace MyProject1.Controllers
         {
             try
             {
-                var activeCalls = await volunteerCallService.GetActiveCallsForVolunteer(volunteerId);
+                var activeCalls = await _volunteerCallService.GetActiveCallsForVolunteer(volunteerId);
                 return Ok(activeCalls);
             }
             catch (System.Exception ex)
             {
-                return BadRequest($"שגיאה בקבלת קריאות פעילות: {ex.Message}");
+                return BadRequest(new { error = ex.Message });
             }
         }
 
@@ -78,12 +108,12 @@ namespace MyProject1.Controllers
         {
             try
             {
-                var historyCalls = await volunteerCallService.GetHistoryCallsForVolunteer(volunteerId);
+                var historyCalls = await _volunteerCallService.GetHistoryCallsForVolunteer(volunteerId);
                 return Ok(historyCalls);
             }
             catch (System.Exception ex)
             {
-                return BadRequest($"שגיאה בקבלת היסטוריית קריאות: {ex.Message}");
+                return BadRequest(new { error = ex.Message });
             }
         }
 
@@ -92,12 +122,13 @@ namespace MyProject1.Controllers
         {
             try
             {
-                await volunteerCallService.RespondToCall(request.CallId, request.VolunteerId, request.Response);
+                var currentVolunteerId = int.Parse(User.FindFirst("id")?.Value);
+                await _volunteerCallService.RespondToCall(request.CallId, request.VolunteerId, request.Response, currentVolunteerId);
                 return Ok(new { message = "תגובה נשמרה בהצלחה" });
             }
             catch (System.Exception ex)
             {
-                return BadRequest($"שגיאה בשמירת תגובה: {ex.Message}");
+                return BadRequest(new { error = ex.Message });
             }
         }
 
@@ -106,12 +137,13 @@ namespace MyProject1.Controllers
         {
             try
             {
-                await volunteerCallService.UpdateVolunteerStatus(callId, volunteerId, request.Status, request.Summary);
+                var currentVolunteerId = int.Parse(User.FindFirst("id")?.Value);
+                await _volunteerCallService.UpdateVolunteerStatus(callId, volunteerId, request.Status, currentVolunteerId, request.Summary);
                 return Ok(new { message = "סטטוס עודכן בהצלחה" });
             }
             catch (System.Exception ex)
             {
-                return BadRequest($"שגיאה בעדכון סטטוס: {ex.Message}");
+                return BadRequest(new { error = ex.Message });
             }
         }
 
@@ -120,16 +152,12 @@ namespace MyProject1.Controllers
         {
             try
             {
-                var info = await volunteerCallService.GetCallVolunteersInfo(callId);
-                return Ok(new CallVolunteersInfoDto
-                {
-                    CallId = callId,
-                    StatusMessage = info
-                });
+                var info = await _volunteerCallService.GetCallVolunteersInfo(callId);
+                return Ok(info);
             }
             catch (System.Exception ex)
             {
-                return BadRequest($"שגיאה בקבלת מידע על קריאה: {ex.Message}");
+                return BadRequest(new { error = ex.Message });
             }
         }
     }

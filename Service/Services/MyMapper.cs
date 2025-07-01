@@ -40,5 +40,7 @@ namespace Service.Services
 
             CreateMap<User, UserDto>().ReverseMap();
         }
+       
     }
+
 }

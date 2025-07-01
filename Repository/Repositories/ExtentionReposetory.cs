@@ -18,7 +18,9 @@ namespace Repository.Repositories
             services.AddScoped<IRepository<VolunteerCalls>, VolunteersCallsRepository>();
             services.AddScoped<IRepository<Volunteers>, VolunteersRepository>();
             services.AddScoped<IRepository<User>, UserRepository>();
-    
+            services.AddScoped<IRepository<Calls>, CallsRepository>(); // עבור VolunteersCallService ו-CallService
+           services.AddScoped<IRepository<VolunteerCalls>, VolunteersCallsRepository>(); // עבור VolunteersCallService
+
             return services;
         }
 

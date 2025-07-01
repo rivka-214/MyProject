@@ -16,11 +16,12 @@ namespace MyProject1.Controllers
         }
 
         [HttpPost("suggest")]
-        public async Task<ActionResult<List<FirstAidGuide>>> Suggest([FromBody] string description)
+        public async Task<ActionResult<List<FirstAidGuide>>> Suggest([FromBody] FirstAidRequestDto request)
         {
-            var guides = await _guideService.GetGuidesByTextAsync(description);
+            var guides = await _guideService.GetGuidesByTextAsync(request.Description);
             return Ok(guides);
         }
+
 
         [HttpGet("all")]
         public async Task<ActionResult<List<FirstAidGuide>>> All()

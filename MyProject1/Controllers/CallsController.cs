@@ -1,130 +1,170 @@
-
 using Common.Dto;
 using Microsoft.AspNetCore.Authorization;
-﻿ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
-using Service.Services;
-using System.Runtime.CompilerServices;
-
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using System.Threading.Tasks;
 
 namespace MyProject1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-
-  
+    [Authorize]
     public class CallsController : ControllerBase
     {
-      
-        private readonly IService<CallsDto> service;
-       
-        private readonly IVolunteersCallLogic logic;
-        private readonly ICallService callService;
+        private readonly ICallService _callService;
+        private readonly IService<CallsDto> _service;
 
-        public CallsController(IService<CallsDto> service, IVolunteersCallLogic logic,ICallService callService)
+        public CallsController(ICallService callService, IService<CallsDto> service)
         {
-            this.service = service;
-            this.logic = logic;
-            this.callService = callService;
+            _callService = callService;
+            _service = service;
         }
 
-        // GET: api/<CategoryController>      
-        [HttpGet] 
-        [Authorize]
-        public async Task<List<CallsDto>> Get()
+        // GET: api/Calls
+        [HttpGet]
+        public async Task<ActionResult<List<CallsDto>>> Get()
         {
-            return await service.GetAllAsync();
+            try
+            {
+                var calls = await _callService.GetAllAsync();
+                return Ok(calls);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
+        // GET: api/Calls/5
         [HttpGet("{id}")]
-        [Authorize]
-        public async Task<CallsDto> Get(int id)
+        public async Task<ActionResult<CallsDto>> Get(int id)
         {
-            return await service.GetByIdAsync(id);
+            try
+            {
+                var call = await _callService.GetByIdAsync(id);
+                if (call == null)
+                    return NotFound(new { error = "קריאה לא נמצאה" });
+                return Ok(call);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
-
+        // POST: api/Calls
         [HttpPost]
-        [Authorize]
-      
-        public async Task<CallsDto> Post([FromForm] CallsDto call)
+        public async Task<ActionResult<CallsDto>> Post([FromForm] CallsDto call)
         {
-            Console.WriteLine($"מיקום שהתקבל: X={call.LocationX}, Y={call.LocationY}");
-
-            if (call.FileImage != null)
-                await UploadImage(call.FileImage);
-
-            call.Status = "נפתחה";
-            var savedCall = await service.AddItemAsync(call);
-
-            if (call.LocationX != 0 && call.LocationY != 0)
+            try
             {
-                await logic.AssignNearbyVolunteersToCall(savedCall.Id, call.LocationX, call.LocationY);
+                var savedCall = await _callService.AddCallAsync(call, Request.Form.Files.FirstOrDefault());
+                return Ok(savedCall);
             }
-
-            return savedCall;
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
-
+        // PUT: api/Calls/5
         [HttpPut("{id}")]
-        [Authorize]
-        public async Task Put(int id, [FromBody] CallsDto value)
+        public async Task<ActionResult> Put(int id, [FromBody] CallsDto value)
         {
-            await Task.Run(() => service.UpdateItemAsync(id, value));
-        }
-
-        private async Task UploadImage(IFormFile file)
-        {
-            var path = Path.Combine(Environment.CurrentDirectory, "Images\\", file.FileName);
-            using (var stream = new FileStream(path, FileMode.Create))
+            try
             {
-                await file.CopyToAsync(stream);
+                var existing = await _callService.GetByIdAsync(id);
+                if (existing == null)
+                    return NotFound(new { error = "קריאה לא נמצאה" });
+
+                await _service.UpdateItemAsync(id, value);
+                return NoContent();
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
 
+        // DELETE: api/Calls/5
         [HttpDelete("{id}")]
-        [Authorize]
-        public async Task Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            await Task.Run(() => service.DeleteItemAsync(id));
+            try
+            {
+                var existing = await _callService.GetByIdAsync(id);
+                if (existing == null)
+                    return NotFound(new { error = "קריאה לא נמצאה" });
+
+                await _service.DeleteItemAsync(id);
+                return NoContent();
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
+        // GET: api/Calls/status/5
         [HttpGet("status/{id}")]
-        public async Task<IActionResult> GetCallStatus(int id)
+        public async Task<ActionResult<string>> GetCallStatus(int id)
         {
-            var call = await Task.FromResult(service.GetByIdAsync(id));
-            if (call == null)
-                return NotFound(new { error = "קריאה לא נמצאה" });
-
-            return Ok(new { status = call.Status });
+            try
+            {
+                var status = await _callService.GetCallStatusWithVolunteersInfo(id);
+                return Ok(new { status });
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
+        // POST: api/Calls/5/assign-nearby
         [HttpPost("{callId}/assign-nearby")]
-        [Authorize]
-        public async Task<IActionResult> AssignNearbyVolunteers(int callId, [FromQuery] double locationX, [FromQuery] double locationY)
+        public async Task<ActionResult> AssignNearbyVolunteers(int callId, [FromQuery] double locationX, [FromQuery] double locationY)
         {
-            await logic.AssignNearbyVolunteersToCall(callId, locationX, locationY);
-            return Ok("מתנדבים הוקצו בהצלחה");
+            try
+            {
+                await _callService.AssignNearbyVolunteersToCall(callId, locationX, locationY);
+                return Ok(new { message = "מתנדבים הוקצו בהצלחה" });
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
+        // PUT: api/Calls/5/status
         [HttpPut("{id}/status")]
-        [Authorize]
-        public async Task<IActionResult> UpdateStatus(int id, [FromBody] StatusDto statusDto)
+        public async Task<ActionResult> UpdateStatus(int id, [FromBody] StatusDto statusDto)
         {
-            await Task.Run(() => callService.UpdateStatus(id, statusDto.Status));
-            return Ok();
+            try
+            {
+                await _callService.UpdateStatus(id, statusDto.Status);
+                return Ok();
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
+        // PUT: api/Calls/5/complete
         [HttpPut("{id}/complete")]
-        [Authorize]
-        public async Task<IActionResult> CompleteCall(int id, [FromBody] CompleteCallDto dto)
+        [Authorize(Roles = "Volunteer")]
+        public async Task<ActionResult> CompleteCall(int id, [FromBody] CompleteCallDto dto)
         {
-            await Task.Run(() => callService.CompleteCall(id, dto));
-            return Ok("הקריאה עודכנה בהצלחה");
+            try
+            {
+                var volunteerId = int.Parse(User.FindFirst("id")?.Value);
+                await _callService.CompleteCall(id, dto, volunteerId);
+                return Ok(new { message = "הקריאה עודכנה בהצלחה" });
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }
-
