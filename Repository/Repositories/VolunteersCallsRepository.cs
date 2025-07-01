@@ -111,10 +111,7 @@ namespace Repository.Repositories
                 .Include(vc => vc.Calls)
                 .ToListAsync();
         }
-        /// <summary>
-        /// מחזיר קריאה ספציפית של מתנדב
-        /// </summary>
-
+     
 
         /// <summary>
         /// מעדכן סטטוס מתנדב לקריאה ספציפית
@@ -196,6 +193,10 @@ namespace Repository.Repositories
             return await context.VolunteerCallsDb
                 .AnyAsync(vc => vc.CallsId == callId && vc.VolunteerStatus == "arrived");
         }
+        /// <summary>
+        /// מחזיר קריאה ספציפית של מתנדב
+        /// </summary>
+
 
        
     }

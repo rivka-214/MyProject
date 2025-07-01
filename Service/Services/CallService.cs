@@ -1,6 +1,5 @@
 ﻿
 using AutoMapper;
-using AutoMapper;
 using Common.Dto;
 using Microsoft.AspNetCore.Http;
 using Reposetory.Entities;
@@ -18,7 +17,8 @@ namespace Service.Services
     public class CallService : IService<CallsDto>, ICallService
     {
         private readonly IRepository<Calls> repository;
-        private readonly ICallsRepository repository;  // שינוי כאן
+        private readonly ICallsRepository CallRepository;  // שינוי כאן
+
         private readonly IMapper mapper;
         private readonly IVolunteersCallLogic _volunteerCallLogic;
         private readonly Func<IVolunteersCallLogic> logicFactory;
@@ -201,10 +201,11 @@ namespace Service.Services
             if (call.LocationX != 0 && call.LocationY != 0)
             {
                 await _volunteerCallLogic.AssignNearbyVolunteersToCall(savedCall.Id, call.LocationX, call.LocationY);
-              
+
             }
 
             return savedCall;
+        }
         public async Task<CallsDto> CreateCallAsync(CallsDto call)
         {
             // העלאת תמונה אם קיימת
@@ -222,23 +223,6 @@ namespace Service.Services
             {
                 Console.WriteLine("❌ לא הצלחנו לשלוף מזהה משתמש מה־JWT");
                 throw new UnauthorizedAccessException("מזהה משתמש לא תקין ב־JWT");
-            }
-
-            Console.WriteLine($"✅ User ID from token: {userId}");
-            call.UserId = userId;
-
-            // מצב ברירת מחדל
-            call.Status = "נפתחה";
-
-            // שמירת הקריאה בבסיס הנתונים
-            var savedCall = await AddItemAsync(call);
-            Console.WriteLine($"📦 Call saved to DB with ID: {savedCall.Id}");
-
-            // הקצאת מתנדבים אם יש מיקום
-            if (call.LocationX != 0 && call.LocationY != 0)
-            {
-                Console.WriteLine($"📍 Assigning volunteers near location: {call.LocationX}, {call.LocationY}");
-                await Logic.AssignNearbyVolunteersToCall(savedCall.Id, call.LocationX, call.LocationY);
             }
 
             Console.WriteLine($"✅ User ID from token: {userId}");
@@ -292,6 +276,8 @@ namespace Service.Services
             }
             return filePath;
         }
+
+      
     }
 }
 
