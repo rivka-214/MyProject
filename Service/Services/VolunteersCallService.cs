@@ -32,9 +32,6 @@ namespace Service.Services
             _callsRepository = callsRepository;
             _mapper = mapper;
             _volunteerLogic = volunteerLogic;
-
-
-
         }
 
         public async Task<VolunteerCallsDto> AddItemAsync(VolunteerCallsDto item)

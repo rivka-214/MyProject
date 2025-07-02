@@ -60,15 +60,6 @@ namespace Mock.Migrations
                     b.Property<int?>("UrgencyLevel")
                         .HasColumnType("int");
 
-<<<<<<< HEAD
-=======
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
->>>>>>> 97d9a2456c204ee850bb277fa46a5749c53d24c1
-                    b.Property<int>("numVolanteer")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
@@ -186,21 +177,7 @@ namespace Mock.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UsersDb");
-<<<<<<< HEAD
-=======
-                });
-
-            modelBuilder.Entity("Reposetory.Entities.Calls", b =>
-                {
-                    b.HasOne("Repository.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
->>>>>>> 97d9a2456c204ee850bb277fa46a5749c53d24c1
+                    b.ToTable("VolunteersDb");
                 });
 
             modelBuilder.Entity("Reposetory.Entities.VolunteerCalls", b =>
