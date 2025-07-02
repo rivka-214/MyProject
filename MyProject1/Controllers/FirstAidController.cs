@@ -1,6 +1,5 @@
 ﻿using Common.Dto;
 using Microsoft.AspNetCore.Mvc;
-using Common.Dto;
 using Service.Services;
 
 [ApiController]

@@ -17,7 +17,7 @@ namespace Service.Services
     public class CallService : IService<CallsDto>, ICallService
     {
         private readonly IRepository<Calls> repository;
-        private readonly ICallsRepository Callrepository;
+        private readonly ICallsRepository _Callrepository;
         private readonly IMapper mapper;
         private readonly IVolunteersCallLogic _volunteerCallLogic;
         private readonly Func<IVolunteersCallLogic> logicFactory;
@@ -27,7 +27,7 @@ namespace Service.Services
 
         public CallService(IRepository<Calls> repository, ICallsRepository Callrepository, IMapper mapper, IVolunteersCallLogic volunteerCallLogic, Func<IVolunteersCallLogic> logicFactory, IHttpContextAccessor httpContextAccessor)
         {
-            Callrepository = Callrepository;
+            this._Callrepository = Callrepository;
             this.repository = repository;
             this.mapper = mapper;
             _volunteerCallLogic = volunteerCallLogic;
@@ -99,7 +99,7 @@ namespace Service.Services
         }
         public async Task<List<CallsDto>> GetCallsByUserId(int userId)
         {
-            var userCalls = await Callrepository.GetCallsByUserId(userId);
+            var userCalls = await _Callrepository.GetCallsByUserId(userId);
             Console.WriteLine($"User calls count: {userCalls.Count}");
             return mapper.Map<List<CallsDto>>(userCalls);
         }

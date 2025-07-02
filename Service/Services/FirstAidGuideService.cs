@@ -46,8 +46,8 @@ namespace Service.Services
 
                 return Task.FromResult(result);
             }
-
-            public List<FirstAidGuide> GetAll()
+   
+        public List<FirstAidGuide> GetAll()
             {
                 return _guides;
             }
