@@ -34,12 +34,12 @@ namespace Service.Services
 
                 var requestBody = new
                 {
-                    model = "gpt-3.5-turbo", // שים לב לשינוי כאן
+                    model = "gpt-3.5-turbo",
                     messages = new[]
                     {
                 new {
                     role = "user",
-                    content = $"אתה מתמחה בעזרה ראשונה. כתוב הוראות עזרה ראשונה מדויקות וברורות למקרה הבא:\n{description}\nבקצרה ועם דגש על מה לעשות עכשיו."
+                    content = $"אתה מתמחה בעזרה ראשונה. כתוב הוראות עזרה ראשונה למקרה הבא:\n{description}\nבקצרה ועם דגש על מה לעשות עכשיו."
                 }
             },
                     max_tokens = 500,
@@ -52,6 +52,9 @@ namespace Service.Services
                 httpRequest.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
                 var response = await _httpClient.SendAsync(httpRequest);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                    return "בוצעו יותר מדי בקשות. נא להמתין ולנסות שוב.";
 
                 response.EnsureSuccessStatusCode();
 
@@ -69,6 +72,7 @@ namespace Service.Services
                 return $"שגיאה בקריאת עזרה ראשונה: {ex.Message}";
             }
         }
+
 
     }
 }
