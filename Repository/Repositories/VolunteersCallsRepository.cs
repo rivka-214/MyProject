@@ -90,16 +90,74 @@ namespace Repository.Repositories
         /// מעדכן סטטוס מתנדב לקריאה ספציפית
         /// </summary>
 
-        public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status)
+        //public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, string summary )
+        //{
+        //    Console.WriteLine($"[Repo] callId={callId}, volunteerId={volunteerId}, status={status}, summary={summary}");
+
+        //    if (string.IsNullOrEmpty(status))
+        //        throw new ArgumentException("status cannot be null or empty", nameof(status));
+
+        //    var call = await GetVolunteerCall(callId, volunteerId);
+        //    if (call != null)
+        //    {
+        //        call.VolunteerStatus = status;
+        //        call.ResponseTime = DateTime.UtcNow;
+
+        //        // 💡 הוספת עדכון summary אם רלוונטי
+        //        //if (!string.IsNullOrEmpty(summary))
+        //        //{
+        //        //    call.Summary = summary;
+        //        //}
+
+        //        await context.SaveAsync();
+        //    }
+        //}
+
+
+        public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status )
         {
+            if (string.IsNullOrEmpty(status))
+                throw new ArgumentException("status cannot be null or empty", nameof(status));
+
             var call = await GetVolunteerCall(callId, volunteerId);
             if (call != null)
             {
                 call.VolunteerStatus = status;
                 call.ResponseTime = DateTime.UtcNow;
+
+               
+             
+                
+
                 await context.SaveAsync();
             }
         }
+
+
+        public async Task UpdateVolunteerFinish(int callId, int volunteerId, string summary)
+        {
+            Console.WriteLine($"[Repo] UpdateVolunteerFinish - callId={callId}, volunteerId={volunteerId}, summary={summary}");
+
+            if (string.IsNullOrEmpty(summary))
+                throw new ArgumentException("summary is required to finish the call", nameof(summary));
+
+            var call = await GetVolunteerCall(callId, volunteerId);
+            if (call == null)
+                throw new Exception("המתנדב לא משויך לקריאה זו");
+
+            call.VolunteerStatus = "finished";
+            call.ResponseTime = DateTime.UtcNow;
+
+            var mainCall = await context.CallsDb.FirstOrDefaultAsync(c => c.Id == callId);
+            if (mainCall == null)
+                throw new Exception("קריאה לא נמצאה");
+
+            mainCall.Status = "Closed";
+            mainCall.Summary = summary;
+
+            await context.SaveAsync();
+        }
+
 
         /// <summary>
         /// מחזיר כמה מתנדבים יצאו לקריאה ספציפית

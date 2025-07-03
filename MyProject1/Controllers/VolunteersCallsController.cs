@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Security.Claims;
 
 namespace MyProject1.Controllers
 {
@@ -122,12 +124,15 @@ namespace MyProject1.Controllers
         {
             try
             {
-                var currentVolunteerId = int.Parse(User.FindFirst("id")?.Value);
-                await _volunteerCallService.RespondToCall(request.CallId, request.VolunteerId, request.Response, currentVolunteerId);
+                // תיקון ה-claim
+                var currentVolunteerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                Console.WriteLine($"[Controller] CallId={request.CallId}, VolunteerId={request.VolunteerId}, Response={request.Response}, currentVolunteerId={currentVolunteerId}");
+                await _volunteerCallService.UpdateVolunteerStatus(request.CallId, request.VolunteerId, request.Response, currentVolunteerId);
                 return Ok(new { message = "תגובה נשמרה בהצלחה" });
             }
             catch (System.Exception ex)
             {
+                Console.WriteLine("[Controller][ERROR] " + ex);
                 return BadRequest(new { error = ex.Message });
             }
         }
@@ -137,8 +142,10 @@ namespace MyProject1.Controllers
         {
             try
             {
-                var currentVolunteerId = int.Parse(User.FindFirst("id")?.Value);
-                await _volunteerCallService.UpdateVolunteerStatus(callId, volunteerId, request.Status, currentVolunteerId, request.Summary);
+                // תיקון ה-claim
+                var currentVolunteerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                // קריאה לפונקציה עם הפרמטרים הנכונים כולל summary
+                await _volunteerCallService.UpdateVolunteerStatus(callId, volunteerId, request.Status, currentVolunteerId);
                 return Ok(new { message = "סטטוס עודכן בהצלחה" });
             }
             catch (System.Exception ex)
@@ -154,6 +161,21 @@ namespace MyProject1.Controllers
             {
                 var info = await _volunteerCallService.GetCallVolunteersInfo(callId);
                 return Ok(info);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("by-volunteer/{volunteerId}")]
+        public async Task<ActionResult<List<VolunteerCallsDto>>> GetCallsByVolunteer(int volunteerId)
+        {
+            try
+            {
+                var allCalls = await _service.GetAllAsync();
+                var filtered = allCalls.Where(vc => vc.VolunteerId == volunteerId).ToList();
+                return Ok(filtered);
             }
             catch (System.Exception ex)
             {

@@ -12,7 +12,7 @@ namespace Common.Dto
     public class UpdateVolunteerStatusDto
     {
         public string Status { get; set; } // "going", "cant", "arrived", "finished"
-        public string Summary { get; set; } // רק לסטטוס "finished"
+       
     }
 
     public class CallVolunteersInfoDto

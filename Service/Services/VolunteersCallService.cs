@@ -88,8 +88,68 @@ namespace Service.Services
             }
         }
 
-        public async Task RespondToCall(int callId, int volunteerId, string response, int currentVolunteerId)
+
+
+        //public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId, string summary = null)
+        //{
+        //    Console.WriteLine($"[Logic] callId={callId}, volunteerId={volunteerId}, status={status}, currentVolunteerId={currentVolunteerId}, summary={summary}");
+
+        //    if (string.IsNullOrEmpty(status))
+        //        throw new ArgumentException("status cannot be null or empty", nameof(status));
+
+        //    var allowed = new[] { "notified", "going", "cant", "arrived", "finished" };
+        //    if (!allowed.Contains(status))
+        //        throw new ArgumentException("Invalid status value", nameof(status));
+
+        //    if (volunteerId != currentVolunteerId) 
+        //        throw new UnauthorizedAccessException("אין הרשאה לעדכן מתנדב אחר");
+
+        //    var repo = _repository as VolunteersCallsRepository;
+        //    if (repo == null)
+        //        throw new Exception("שגיאה פנימית במסד הנתונים");
+
+        //    var exists = await repo.GetVolunteerCall(callId, volunteerId);
+        //    if (exists == null)
+        //        throw new Exception("המתנדב לא משויך לקריאה זו");
+
+        //    await repo.UpdateVolunteerStatus(callId, volunteerId, status,summary);
+
+        //    if (status == "arrived")
+        //    {
+        //        var call = await _callsRepository.GetById(callId);
+        //        if (call == null)
+        //            throw new System.Exception("קריאה לא נמצאה");
+
+        //        call.Status = "InProgress";
+        //        await _callsRepository.UpdateItem(callId, call);
+        //    }
+        //    else if (status == "finished")
+        //    {
+        //        var call = await _callsRepository.GetById(callId);
+        //        if (call == null)
+
+        //            throw new System.Exception("קריאה לא נמצאה");
+
+
+        //        if (!string.IsNullOrEmpty(summary))
+        //        {
+        //            call.Summary = summary;
+        //        }
+        //        call.Status = "Closed";
+        //        await _callsRepository.UpdateItem(callId, call);
+        //    }
+        //}
+        public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId)
         {
+            Console.WriteLine($"[Logic] callId={callId}, volunteerId={volunteerId}, status={status}, currentVolunteerId={currentVolunteerId}");
+
+            if (string.IsNullOrEmpty(status))
+                throw new ArgumentException("status cannot be null or empty", nameof(status));
+
+            var allowed = new[] { "notified", "going", "cant", "arrived", "finished" };
+            if (!allowed.Contains(status))
+                throw new ArgumentException("Invalid status value", nameof(status));
+
             if (volunteerId != currentVolunteerId)
                 throw new UnauthorizedAccessException("אין הרשאה לעדכן מתנדב אחר");
 
@@ -101,71 +161,31 @@ namespace Service.Services
             if (exists == null)
                 throw new Exception("המתנדב לא משויך לקריאה זו");
 
-            await repo.UpdateVolunteerStatus(callId, volunteerId, response);
+            //if (status == "finished")
+            //{
+            //    if (string.IsNullOrEmpty(summary))
+            //        throw new ArgumentException("Summary חייב להיות בעת סיום הקריאה");
 
-            if (response == "going")
+            //    await repo.UpdateVolunteerFinish(callId, volunteerId, summary);
+            //}
+            else
             {
-                if (await ShouldSendToMoreVolunteers(callId))
+                await repo.UpdateVolunteerStatus(callId, volunteerId, status);
+
+                if (status == "arrived")
                 {
                     var call = await _callsRepository.GetById(callId);
-                    if (call != null)
-                        await AssignNearbyVolunteersToCall(callId, call.LocationX, call.LocationY);
-                }
-            }
-            else if (response == "arrived")
-            {
-                var call = await _callsRepository.GetById(callId);
-                if (call == null)
-                    throw new System.Exception("קריאה לא נמצאה");
+                    if (call == null)
+                        throw new Exception("קריאה לא נמצאה");
 
-                call.Status = "InProgress";
-                await _callsRepository.UpdateItem(callId, call);
-            }
-        }
-
-        public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId, string summary = null)
-        {
-            if (volunteerId != currentVolunteerId)
-                throw new UnauthorizedAccessException("אין הרשאה לעדכן מתנדב אחר");
-
-            var repo = _repository as VolunteersCallsRepository;
-            if (repo == null)
-                throw new Exception("שגיאה פנימית במסד הנתונים");
-
-            var exists = await repo.GetVolunteerCall(callId, volunteerId);
-            if (exists == null)
-                throw new Exception("המתנדב לא משויך לקריאה זו");
-
-            await repo.UpdateVolunteerStatus(callId, volunteerId, status);
-
-            if (status == "arrived")
-            {
-                var call = await _callsRepository.GetById(callId);
-                if (call == null)
-                    throw new System.Exception("קריאה לא נמצאה");
-
-                call.Status = "InProgress";
-                await _callsRepository.UpdateItem(callId, call);
-            }
-            else if (status == "finished")
-            {
-                var call = await _callsRepository.GetById(callId);
-                if (call == null)
-                    throw new System.Exception("קריאה לא נמצאה");
-
-                if (!string.IsNullOrEmpty(summary))
-                {
-                    call.Summary = summary;
-                    call.Status = "Closed";
-                    await _callsRepository.UpdateItem(callId, call);
-                }
-                else
-                {
-                    call.Status = "Closed";
+                    call.Status = "InProgress";
                     await _callsRepository.UpdateItem(callId, call);
                 }
             }
         }
+
+
+
 
         public async Task<bool> ShouldSendToMoreVolunteers(int callId)
         {
@@ -260,6 +280,10 @@ namespace Service.Services
                 }
             }
         }
-       
+
+        public Task UpdateVolunteerStatus(int callId, int volunteerId, string statusy)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
