@@ -12,10 +12,10 @@ namespace MyProject1.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IService<UserDto> _service;
+        private readonly IUserServicecs _service;
         private readonly IConfiguration _config;
-
-        public UserController(IService<UserDto> service, IConfiguration config)
+       
+        public UserController(IUserServicecs service, IConfiguration config)
         {
             _service = service;
             _config = config;
@@ -36,6 +36,11 @@ namespace MyProject1.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] UserDto user)
         {
+            if (await _service.GmailExistsAsync(user.Gmail))
+            {
+                return BadRequest("משתמש עם האימייל הזה כבר קיים.");
+            }
+
             if (string.IsNullOrEmpty(user.Role))
                 user.Role = "User";
 

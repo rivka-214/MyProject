@@ -63,7 +63,7 @@ builder.Services.AddHttpContextAccessor();
 
 // ✅ Add DB context (mocked)
 builder.Services.AddDbContext<IContext, Database>();
-
+builder.Services.AddScoped<IUserServicecs, UserService>();
 // ✅ AutoMapper
 builder.Services.AddAutoMapper(typeof(MyMapper));
 builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();

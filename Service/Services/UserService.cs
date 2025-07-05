@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Service.Services
 {
-    public class UserService : IService<UserDto>
+    public class UserService : IService<UserDto>, IUserServicecs
     {
         private readonly IRepository<User> _repository;
         private readonly IMapper _mapper;
@@ -48,6 +48,11 @@ namespace Service.Services
         {
             var entity = _mapper.Map<User>(item);
             await _repository.UpdateItem(id, entity);
+        }
+        public async Task<bool> GmailExistsAsync(string gmail)
+        {
+            var users = await GetAllAsync();
+            return users.Any(u => u.Gmail.Equals(gmail, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
