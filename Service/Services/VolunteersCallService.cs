@@ -281,9 +281,6 @@ namespace Service.Services
             }
         }
 
-        public Task UpdateVolunteerStatus(int callId, int volunteerId, string statusy)
-        {
-            throw new NotImplementedException();
-        }
+     
     }
 }

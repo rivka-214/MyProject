@@ -174,7 +174,9 @@ namespace MyProject1.Controllers
             try
             {
                 var allCalls = await _service.GetAllAsync();
-                var filtered = allCalls.Where(vc => vc.VolunteerId == volunteerId).ToList();
+                var filtered = allCalls
+                    .Where(vc => vc.VolunteerId == volunteerId && vc.VolunteerStatus == "notified")
+                    .ToList();
                 return Ok(filtered);
             }
             catch (System.Exception ex)

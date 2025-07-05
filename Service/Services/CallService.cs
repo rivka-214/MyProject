@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using Common.Dto;
 using Microsoft.AspNetCore.Http;
 using Reposetory.Entities;
@@ -92,6 +91,9 @@ namespace Service.Services
             var volunteerStatus = await _volunteerCallLogic.GetVolunteerStatus(id, volunteerId);
             if (volunteerStatus != "arrived")
                 throw new System.Exception("רק מתנדב שהגיע יכול לסגור קריאה");
+
+            // עדכון סטטוס המתנדב ל-finished
+            await _volunteerCallLogic.UpdateVolunteerStatus(id, volunteerId, "finished", volunteerId);
 
             call.Summary = dto.Summary;
             call.Status = "Closed";

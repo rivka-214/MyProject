@@ -69,7 +69,7 @@ namespace Repository.Repositories
         public async Task<List<VolunteerCalls>> GetActiveCallsForVolunteer(int volunteerId)
         {
             return await context.VolunteerCallsDb
-                .Where(vc => vc.VolunteerId == volunteerId && vc.VolunteerStatus != "cant" && vc.VolunteerStatus != "finished")
+                .Where(vc => vc.VolunteerId == volunteerId && vc.VolunteerStatus != "cant" && vc.VolunteerStatus != "finished"&& vc.VolunteerStatus != "notified")
                 .Include(vc => vc.Calls)
                 .ToListAsync();
         }
