@@ -179,7 +179,16 @@ namespace Service.Services
                 call.ArrImage = await File.ReadAllBytesAsync(path); // שמירת התמונה כ-byte[]
             }
 
+            // שליפת מזהה משתמש מתוך JWT
+            var httpContext = _httpContextAccessor.HttpContext;
+            var userIdStr = httpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdStr, out int userId))
+                throw new UnauthorizedAccessException("מזהה משתמש לא תקין ב־JWT");
+
+            call.UserId = userId;
+            call.Date = DateTime.Now; // או DateTime.UtcNow
             call.Status = "Open";
+
             var entity = mapper.Map<Calls>(call);
             var added = await repository.AddItem(entity);
             var savedCall = mapper.Map<CallsDto>(added);
@@ -199,6 +208,11 @@ namespace Service.Services
         }
     }
 }
+
+
+
+
+
 
 
 

@@ -28,51 +28,46 @@ namespace Service.Services
 
         public async Task<string> GetFirstAidInstructionsAsync(string description)
         {
-            try
-            {
-                var url = "https://api.openai.com/v1/chat/completions";
+            var url = "https://api.openai.com/v1/chat/completions";
 
-                var requestBody = new
+            var requestBody = new
+            {
+                model = "gpt-4",
+                messages = new[]
                 {
-                    model = "gpt-4.1 -nano",
-                    messages = new[]
-                    {
-                new {
-                    role = "user",
-                    content = $"אתה מתמחה בעזרה ראשונה. כתוב הוראות עזרה ראשונה למקרה הבא:\n{description}\nבקצרה ועם דגש על מה לעשות עכשיו."
-                }
-            },
-                    max_tokens = 500,
-                    temperature = 0.3
-                };
+                    new {
+                        role = "user",
+                        content = $"אתה מתמחה בעזרה ראשונה. כתוב הוראות עזרה ראשונה למקרה הבא:\n{description}\nבקצרה ועם דגש על מה לעשות עכשיו."
+                    }
+                },
+                max_tokens = 500,
+                temperature = 0.3
+            };
 
-                var jsonBody = JsonSerializer.Serialize(requestBody);
-                var httpRequest = new HttpRequestMessage(HttpMethod.Post, url);
-                httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-                httpRequest.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var jsonBody = JsonSerializer.Serialize(requestBody);
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, url);
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+            httpRequest.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.SendAsync(httpRequest);
+            var response = await _httpClient.SendAsync(httpRequest);
 
-                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-                    return "בוצעו יותר מדי בקשות. נא להמתין ולנסות שוב.";
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                return "בוצעו יותר מדי בקשות. נא להמתין ולנסות שוב.";
 
-                response.EnsureSuccessStatusCode();
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                return "שגיאת אימות: מפתח ה-API שגוי או חסר הרשאות.";
 
-                using var responseStream = await response.Content.ReadAsStreamAsync();
-                using var doc = await JsonDocument.ParseAsync(responseStream);
+            if (!response.IsSuccessStatusCode)
+                return $"שגיאה: קוד סטטוס {((int)response.StatusCode)} - {response.ReasonPhrase}";
 
-                var choice = doc.RootElement.GetProperty("choices")[0];
-                var message = choice.GetProperty("message");
-                var content = message.GetProperty("content").GetString();
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            using var doc = await JsonDocument.ParseAsync(responseStream);
 
-                return content ?? "לא נמצאו הוראות";
-            }
-            catch (Exception ex)
-            {
-                return $"שגיאה בקריאת עזרה ראשונה: {ex.Message}";
-            }
+            var choice = doc.RootElement.GetProperty("choices")[0];
+            var message = choice.GetProperty("message");
+            var content = message.GetProperty("content").GetString();
+
+            return content ?? "לא נמצאו הוראות";
         }
-
-
     }
 }
