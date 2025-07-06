@@ -140,22 +140,7 @@ namespace MyProject1.Controllers
         }
 
      
-        // PUT: api/Calls/5/complete
-        [HttpPut("{id}/complete")]
-        [Authorize(Roles = "Volunteer")]
-        public async Task<ActionResult> CompleteCall(int id, [FromBody] CompleteCallDto dto)
-        {
-            try
-            {
-                var volunteerId = int.Parse(User.FindFirst("id")?.Value);
-                await _callService.CompleteCall(id, dto, volunteerId);
-                return Ok(new { message = "הקריאה עודכנה בהצלחה" });
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-        }
+    
         [HttpGet("by-user")]
         [Authorize]
         public async Task<ActionResult<List<CallsDto>>> GetCallsByUser()

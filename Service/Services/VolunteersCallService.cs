@@ -84,8 +84,6 @@ namespace Service.Services
                     VolunteerId = volunteer.Id,
                     VolunteerStatus = "notified",
                     ResponseTime = DateTime.UtcNow,
-                    Call = callDetails,
-                    Volunteer = volunteer,
                     GoingVolunteersCount = 0
                 };
 
@@ -96,28 +94,7 @@ namespace Service.Services
 
 
 
-        //public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId, string summary = null)
-        //{
-        //    Console.WriteLine($"[Logic] callId={callId}, volunteerId={volunteerId}, status={status}, currentVolunteerId={currentVolunteerId}, summary={summary}");
-
-        //    if (string.IsNullOrEmpty(status))
-        //        throw new ArgumentException("status cannot be null or empty", nameof(status));
-
-        //    var allowed = new[] { "notified", "going", "cant", "arrived", "finished" };
-        //    if (!allowed.Contains(status))
-        //        throw new ArgumentException("Invalid status value", nameof(status));
-
-        //    if (volunteerId != currentVolunteerId) 
-        //        throw new UnauthorizedAccessException("אין הרשאה לעדכן מתנדב אחר");
-
-        //    var repo = _repository as VolunteersCallsRepository;
-        //    if (repo == null)
-        //        throw new Exception("שגיאה פנימית במסד הנתונים");
-
-        //    var exists = await repo.GetVolunteerCall(callId, volunteerId);
-        //    if (exists == null)
-        //        throw new Exception("המתנדב לא משויך לקריאה זו");
-
+       
         public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId)
         {
             Console.WriteLine($"[Logic] callId={callId}, volunteerId={volunteerId}, status={status}, currentVolunteerId={currentVolunteerId}");
@@ -140,13 +117,7 @@ namespace Service.Services
             if (exists == null)
                 throw new Exception("המתנדב לא משויך לקריאה זו");
 
-            //if (status == "finished")
-            //{
-            //    if (string.IsNullOrEmpty(summary))
-            //        throw new ArgumentException("Summary חייב להיות בעת סיום הקריאה");
-
-            //    await repo.UpdateVolunteerFinish(callId, volunteerId, summary);
-            //}
+     
             else
             {
                 await repo.UpdateVolunteerStatus(callId, volunteerId, status);
@@ -274,14 +245,23 @@ namespace Service.Services
             if (repo == null)
                 throw new Exception("שגיאה פנימית במסד הנתונים");
 
-            // שלוף את כל הקריאות של המתנדב (לא רק היסטוריות)
+            // שלוף את כל הקריאות של המתנדב
             var volunteerCalls = await repo.GetAllCallsForVolunteer(volunteerId);
-            // תמפה ל-CallsDto (דרך ה-Calls של כל VolunteerCalls)
+
+            // הדפס לדיבוג
+            Console.WriteLine($"נמצאו {volunteerCalls.Count} קריאות למתנדב {volunteerId}");
+
+            // תמפה ל-CallsDto
             var calls = volunteerCalls
-                .Where(vc => vc.Calls != null)
-                .Select(vc => _mapper.Map<CallsDto>(vc.Calls))
+                .Where(vc => vc.Calls != null) // ודא שיש קריאה
+                .Select(vc =>
+                {
+                    Console.WriteLine($"ממפה קריאה ID: {vc.Calls.Id}, תיאור: {vc.Calls.Description}");
+                    return _mapper.Map<CallsDto>(vc.Calls);
+                })
                 .ToList();
 
+            Console.WriteLine($"הוחזרו {calls.Count} קריאות אחרי המיפוי");
             return calls;
         }
 

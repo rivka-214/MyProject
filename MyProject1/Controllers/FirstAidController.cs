@@ -1,40 +1,28 @@
-﻿using Common.Dto;
-using Microsoft.AspNetCore.Mvc;
-using Service.Services;
+﻿using Microsoft.AspNetCore.Mvc;
+using MyProject.Services;
+using System.Threading.Tasks;
 
-[ApiController]
-[Route("api/[controller]")]
-  
-public class FirstAidController : ControllerBase
+namespace MyProject.Controllers
 {
-    private readonly IFirstAidGuideService _guideService;
-    private readonly IOpenAiService _openAiService;
-
-    public FirstAidController(IFirstAidGuideService guideService, IOpenAiService openAiService)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class FirstAidController : ControllerBase
     {
-        _guideService = guideService;
-        _openAiService = openAiService;
-    }
+        private readonly FirstAidAiService _firstAidService;
 
-    [HttpPost("suggest")]
-    public async Task<ActionResult<List<FirstAidGuide>>> Suggest([FromBody] string description)
-    {
-        var guides = await _guideService.GetGuidesByTextAsync(description);
-        return Ok(guides);
-    }
+        public FirstAidController(FirstAidAiService firstAidService)
+        {
+            _firstAidService = firstAidService;
+        }
 
+        [HttpPost("ai")]
+        public async Task<IActionResult> GetFirstAidInstructions([FromBody] string description)
+        {
+            if (string.IsNullOrWhiteSpace(description))
+                return BadRequest("Description is required");
 
-    [HttpGet("all")]
-    public async Task<ActionResult<List<FirstAidGuide>>> All()
-    {
-        var guides = await Task.FromResult(_guideService.GetAll());
-        return Ok(guides);
-    }
-
-    [HttpPost("ai")]
-    public async Task<ActionResult<string>> GetAiFirstAidInstructions([FromBody] string description)
-    {
-        var result = await _openAiService.GetFirstAidInstructionsAsync(description);
-        return Ok(result);
+            var result = await _firstAidService.GetFirstAidInstructionsAsync(description);
+            return Ok(result);
+        }
     }
 }

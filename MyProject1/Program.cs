@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Mock;
+using MyProject.Services;
 using Repository.Interfacese;
 using Repository.Repositories;
 using Service.Interfaces;
@@ -30,7 +31,7 @@ builder.Services.AddSwaggerGen(option =>
         BearerFormat = "JWT",
         Scheme = "Bearer"
     });
-
+    builder.Services.AddHttpClient<FirstAidAiService>();
     option.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -67,7 +68,7 @@ builder.Services.AddScoped<IUserServicecs, UserService>();
 // ✅ AutoMapper
 builder.Services.AddAutoMapper(typeof(MyMapper));
 builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
-builder.Services.AddScoped<IFirstAidGuideService, FirstAidGuideService>();
+
 // ✅ VolunteersCallService - Multi-Interface registration
 builder.Services.AddScoped<VolunteersCallService>();
 builder.Services.AddScoped<IVolunteersCallLogic>(sp => sp.GetRequiredService<VolunteersCallService>());
@@ -100,7 +101,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
-
 
 // Load appsettings.Development.json
 builder.Configuration

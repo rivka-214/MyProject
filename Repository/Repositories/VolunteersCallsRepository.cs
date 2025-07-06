@@ -24,11 +24,12 @@ namespace Repository.Repositories
             await this.context.VolunteerCallsDb.AddAsync(item);
             await this.context.SaveAsync();
 
-            var dbContext = (DbContext)this.context;
-            await dbContext.Entry(item).Reference(vc => vc.Calls).LoadAsync();
-            await dbContext.Entry(item).Reference(vc => vc.Volunteer).LoadAsync();
-
-            return item;
+            // אם אתה צריך לטעון את הנתונים הקשורים, עשה את זה בצורה נכונה:
+            // החזר את הפריט מהדטבייס עם הנתונים הקשורים
+            return await this.context.VolunteerCallsDb
+                .Include(vc => vc.Calls)
+                .Include(vc => vc.Volunteer)
+                .FirstOrDefaultAsync(vc => vc.Id == item.Id);
         }
 
         public async Task DeleteItem(int id)
@@ -89,33 +90,7 @@ namespace Repository.Repositories
                 .ToListAsync();
         }
 
-
-        /// <summary>
-        /// מעדכן סטטוס מתנדב לקריאה ספציפית
-        /// </summary>
-
-        //public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, string summary )
-        //{
-        //    Console.WriteLine($"[Repo] callId={callId}, volunteerId={volunteerId}, status={status}, summary={summary}");
-
-        //    if (string.IsNullOrEmpty(status))
-        //        throw new ArgumentException("status cannot be null or empty", nameof(status));
-
-        //    var call = await GetVolunteerCall(callId, volunteerId);
-        //    if (call != null)
-        //    {
-        //        call.VolunteerStatus = status;
-        //        call.ResponseTime = DateTime.UtcNow;
-
-        //        // 💡 הוספת עדכון summary אם רלוונטי
-        //        //if (!string.IsNullOrEmpty(summary))
-        //        //{
-        //        //    call.Summary = summary;
-        //        //}
-
-        //        await context.SaveAsync();
-        //    }
-        //}
+   
 
 
         public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status )
@@ -202,13 +177,26 @@ namespace Repository.Repositories
         }
 
 
-
         public async Task<List<VolunteerCalls>> GetAllCallsForVolunteer(int volunteerId)
         {
-            return await context.VolunteerCallsDb
+            var result = await context.VolunteerCallsDb
                 .Where(vc => vc.VolunteerId == volunteerId)
-                .Include(vc => vc.Calls)
+                .Include(vc => vc.Calls) // טען את פרטי הקריאה
+                .Include(vc => vc.Volunteer) // טען את פרטי המתנדב (אם צריך)
                 .ToListAsync();
+
+            // הדפס לדיבוג
+            Console.WriteLine($"Repository: נמצאו {result.Count} רשומות למתנדב {volunteerId}");
+            foreach (var item in result)
+            {
+                Console.WriteLine($"- VolunteerCall ID: {item.Id}, CallId: {item.Id}, Calls null: {item.Calls == null}");
+                if (item.Calls != null)
+                {
+                    Console.WriteLine($"  Call Details: ID={item.Calls.Id}, Description={item.Calls.Description}");
+                }
+            }
+
+            return result;
         }
         public async Task CompleteCallAndUpdateVolunteers(int callId, int finishingVolunteerId, string summary, bool sentToHospital, string? hospitalName)
         {

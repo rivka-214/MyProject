@@ -25,7 +25,7 @@ namespace Service.Services
           
             services.AddScoped<IService<UserDto>, UserService>();
             services.AddScoped<IVolunteerLogic, VolunteerLogic>();
-            services.AddSingleton<IFirstAidGuideService, FirstAidGuideService>();
+            //services.AddSingleton<IFirstAidGuideService, FirstAidGuideService>();
             services.AddScoped<IVolunteersCallLogic, VolunteersCallService>();
             services.AddScoped<ICallService, CallService>();
 
