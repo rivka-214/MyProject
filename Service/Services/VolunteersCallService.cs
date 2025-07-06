@@ -71,10 +71,14 @@ namespace Service.Services
             var entity = _mapper.Map<VolunteerCalls>(item);
             await _repository.UpdateItem(id, entity);
         }
-
         public async Task AssignNearbyVolunteersToCall(int callId, double locationX, double locationY)
         {
             var nearbyVolunteers = await _volunteerLogic.GetNearbyVolunteers(locationX, locationY);
+
+            // שליפת הקריאה המלאה מה-Repository
+            var callEntity = await _callsRepository.GetById(callId);
+            var callDetails = _mapper.Map<CallsDto>(callEntity);
+
             foreach (var volunteer in nearbyVolunteers.Take(20))
             {
                 var newItem = new VolunteerCallsDto
@@ -82,11 +86,17 @@ namespace Service.Services
                     CallsId = callId,
                     VolunteerId = volunteer.Id,
                     VolunteerStatus = "notified",
-                    ResponseTime = DateTime.UtcNow
+                    ResponseTime = DateTime.UtcNow,
+
+                    Call = callDetails,              // פרטי הקריאה המלאים
+                    Volunteer = volunteer,           // פרטי המתנדב המלאים
+                    GoingVolunteersCount = 0
                 };
+
                 await AddItemAsync(newItem);
             }
         }
+
 
 
 

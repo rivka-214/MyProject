@@ -112,18 +112,44 @@ namespace Service.Services
 
             client.DefaultRequestHeaders.Add("User-Agent", "VolunteerApp");
 
-            var response = await client.GetAsync(url);
-            var json = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<List<NominatimResult>>(json);
+            Console.WriteLine($"🔍 Requesting coordinates for address: {address}");
+            Console.WriteLine($"📡 Full URL: {url}");
 
-            if (result != null && result.Any())
+            try
             {
-                var location = result.First();
-                return (double.Parse(location.lat), double.Parse(location.lon));
+                var response = await client.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"❌ Request failed with status: {response.StatusCode}");
+                    return (0, 0);
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"📄 Raw JSON response: {json}");
+
+                var result = JsonSerializer.Deserialize<List<NominatimResult>>(json);
+
+                if (result != null && result.Any())
+                {
+                    var location = result.First();
+                    Console.WriteLine($"✅ Found location: lat={location.lat}, lon={location.lon}");
+
+                    return (double.Parse(location.lat), double.Parse(location.lon));
+                }
+                else
+                {
+                    Console.WriteLine("⚠️ No matching location found for the address.");
+                }
             }
-            Console.WriteLine("no found adress");
-            return (0, 0); // או אולי תזרוק חריגה או תכתוב לוג
+            catch (Exception ex)
+            {
+                Console.WriteLine($"🔥 Exception while retrieving coordinates: {ex.Message}");
+            }
+
+            return (0, 0); // fallback
         }
+
 
         private class NominatimResult
         {
