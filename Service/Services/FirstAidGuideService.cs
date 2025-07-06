@@ -1,55 +1,38 @@
-﻿using Common.Dto;
+﻿using System.Net.Http;
+using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.Hosting;
+using System.Threading.Tasks;
 
-namespace Service.Services
+namespace MyProject.Services
 {
-    public interface IFirstAidGuideService
+    public class FirstAidAiService
     {
-        Task<List<FirstAidGuide>> GetGuidesByTextAsync(string description);
-        List<FirstAidGuide> GetAll();
-    }
+        private readonly HttpClient _httpClient;
 
-
-
-    public class FirstAidGuideService : IFirstAidGuideService
+        public FirstAidAiService(HttpClient httpClient)
         {
-            private readonly IWebHostEnvironment _env;
-            private List<FirstAidGuide> _guides;
+            _httpClient = httpClient;
+        }
 
-            public FirstAidGuideService(IWebHostEnvironment env)
+        public async Task<string> GetFirstAidInstructionsAsync(string prompt)
+        {
+            var requestBody = new
             {
-                _env = env;
-                LoadGuides();
-            }
+                model = "mistral",
+                prompt = prompt,
+                stream = false
+            };
 
-            private void LoadGuides()
-            {
-                var path = Path.Combine(_env.WebRootPath, "data", "firstAidGuides.json");
-                var json = File.ReadAllText(path);
+            var json = JsonSerializer.Serialize(requestBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
+            var response = await _httpClient.PostAsync("http://localhost:11434/api/generate", content);
+            response.EnsureSuccessStatusCode();
 
-                _guides = JsonSerializer.Deserialize<List<FirstAidGuide>>(json, options) ?? new();
-                Console.WriteLine($"✅ Loaded {_guides.Count} guides from JSON");
-            }
+            var responseContent = await response.Content.ReadAsStringAsync();
 
-            public Task<List<FirstAidGuide>> GetGuidesByTextAsync(string description)
-            {
-                var desc = description.ToLower();
-                var result = _guides
-                    .Where(g => g.Tags != null && g.Tags.Any(tag => desc.Contains(tag.ToLower())))
-                    .ToList();
-
-                return Task.FromResult(result);
-            }
-   
-        public List<FirstAidGuide> GetAll()
-            {
-                return _guides;
-            }
+            using var doc = JsonDocument.Parse(responseContent);
+            return doc.RootElement.GetProperty("response").GetString();
         }
     }
+}
