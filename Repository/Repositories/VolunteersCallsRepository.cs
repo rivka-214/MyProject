@@ -23,9 +23,13 @@ namespace Repository.Repositories
         {
             await this.context.VolunteerCallsDb.AddAsync(item);
             await this.context.SaveAsync();
+
+            var dbContext = (DbContext)this.context;
+            await dbContext.Entry(item).Reference(vc => vc.Calls).LoadAsync();
+            await dbContext.Entry(item).Reference(vc => vc.Volunteer).LoadAsync();
+
             return item;
         }
-
 
         public async Task DeleteItem(int id)
         {

@@ -87,15 +87,15 @@ namespace Service.Services
                     VolunteerId = volunteer.Id,
                     VolunteerStatus = "notified",
                     ResponseTime = DateTime.UtcNow,
-
-                    Call = callDetails,              // פרטי הקריאה המלאים
-                    Volunteer = volunteer,           // פרטי המתנדב המלאים
+                    Call = callDetails,
+                    Volunteer = volunteer,
                     GoingVolunteersCount = 0
                 };
 
                 await AddItemAsync(newItem);
             }
         }
+
 
 
 

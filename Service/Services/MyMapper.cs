@@ -1,46 +1,33 @@
 ﻿using AutoMapper;
 using Common.Dto;
 using Reposetory.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Repository.Entities;
 
-
-namespace Service.Services
+public class MyMapper : Profile
 {
-    public class MyMapper : Profile
+    public MyMapper()
     {
-        public MyMapper()
-        {
-            string path = Path.Combine(Environment.CurrentDirectory, "Images/");//פונקציה שמביאה לי את הניתוב
-                                                                                //string to byte[]
-                                                                                //     CreateMap<Calls, CallsDto>().ForMember("ArrImage", x => x.MapFrom(y => File.ReadAllBytes(path + y.ImageUrl)));
-            CreateMap<CallsDto, Calls>().ForMember("ImageUrl", x => x.MapFrom(y => y.FileImage.FileName));
-            CreateMap<Calls, CallsDto>()
-            .ForMember("ArrImage", x => x.MapFrom(y =>
-            File.Exists(Path.Combine(path, y.ImageUrl))
-            ? File.ReadAllBytes(Path.Combine(path, y.ImageUrl))
-            : null
-    ));
+        string path = Path.Combine(Environment.CurrentDirectory, "Images/");
 
-           
-            CreateMap<VolunteerCalls, VolunteerCallsDto>()
-                .ForMember(dest => dest.Call, opt => opt.MapFrom(src => src.Calls))
-                .ReverseMap()
-                .ForMember(dest => dest.Calls, opt => opt.MapFrom(src => src.Call));
+        CreateMap<CallsDto, Calls>()
+            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.FileImage.FileName));
 
-            
-            CreateMap<Volunteers, VolunteersDto>().ReverseMap();
+        CreateMap<Calls, CallsDto>()
+            .ForMember(dest => dest.ArrImage, opt => opt.MapFrom(src =>
+                File.Exists(Path.Combine(path, src.ImageUrl))
+                ? File.ReadAllBytes(Path.Combine(path, src.ImageUrl))
+                : null
+            ));
 
- 
+        CreateMap<VolunteerCalls, VolunteerCallsDto>()
+            .ForMember(dest => dest.Call, opt => opt.MapFrom(src => src.Calls))
+            .ForMember(dest => dest.Volunteer, opt => opt.MapFrom(src => src.Volunteer))
+            .ReverseMap()
+            .ForMember(dest => dest.Calls, opt => opt.MapFrom(src => src.Call))
+            .ForMember(dest => dest.Volunteer, opt => opt.MapFrom(src => src.Volunteer));
 
-            CreateMap<User, UserDto>().ReverseMap();
-        }
-       
+        CreateMap<Calls, CallsDto>().ReverseMap();
+        CreateMap<Volunteers, VolunteersDto>().ReverseMap();
+        CreateMap<User, UserDto>().ReverseMap();
     }
-
 }
