@@ -68,10 +68,14 @@ namespace Service.Services
             var entity = _mapper.Map<VolunteerCalls>(item);
             await _repository.UpdateItem(id, entity);
         }
-
         public async Task AssignNearbyVolunteersToCall(int callId, double locationX, double locationY)
         {
             var nearbyVolunteers = await _volunteerLogic.GetNearbyVolunteers(locationX, locationY);
+
+            // שליפת הקריאה המלאה מה-Repository
+            var callEntity = await _callsRepository.GetById(callId);
+            var callDetails = _mapper.Map<CallsDto>(callEntity);
+
             foreach (var volunteer in nearbyVolunteers.Take(20))
             {
                 var newItem = new VolunteerCallsDto
@@ -79,13 +83,40 @@ namespace Service.Services
                     CallsId = callId,
                     VolunteerId = volunteer.Id,
                     VolunteerStatus = "notified",
-                    ResponseTime = DateTime.UtcNow
+                    ResponseTime = DateTime.UtcNow,
+                    Call = callDetails,
+                    Volunteer = volunteer,
+                    GoingVolunteersCount = 0
                 };
+
                 await AddItemAsync(newItem);
             }
         }
 
 
+
+
+        //public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId, string summary = null)
+        //{
+        //    Console.WriteLine($"[Logic] callId={callId}, volunteerId={volunteerId}, status={status}, currentVolunteerId={currentVolunteerId}, summary={summary}");
+
+        //    if (string.IsNullOrEmpty(status))
+        //        throw new ArgumentException("status cannot be null or empty", nameof(status));
+
+        //    var allowed = new[] { "notified", "going", "cant", "arrived", "finished" };
+        //    if (!allowed.Contains(status))
+        //        throw new ArgumentException("Invalid status value", nameof(status));
+
+        //    if (volunteerId != currentVolunteerId) 
+        //        throw new UnauthorizedAccessException("אין הרשאה לעדכן מתנדב אחר");
+
+        //    var repo = _repository as VolunteersCallsRepository;
+        //    if (repo == null)
+        //        throw new Exception("שגיאה פנימית במסד הנתונים");
+
+        //    var exists = await repo.GetVolunteerCall(callId, volunteerId);
+        //    if (exists == null)
+        //        throw new Exception("המתנדב לא משויך לקריאה זו");
 
         public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId)
         {

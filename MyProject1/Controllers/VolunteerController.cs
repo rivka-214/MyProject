@@ -39,8 +39,16 @@ namespace MyProject1.Controllers
 
        
         [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> Post([FromBody] VolunteersDto value)
         {
+            // בדיקה אם כבר קיים מתנדב עם אותו gmail
+            var allVolunteers = await _service.GetAllAsync();
+            if (allVolunteers.Any(v => v.Gmail == value.Gmail))
+            {
+                return BadRequest("כתובת המייל כבר רשומה במערכת.");
+            }
+
             var createdVolunteer = await _serviceLogic.RegisterVolunteerWithLocation(value);
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
@@ -48,10 +56,10 @@ namespace MyProject1.Controllers
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Email, createdVolunteer.Gmail),
-                new Claim(ClaimTypes.NameIdentifier, createdVolunteer.Id.ToString()),
-                new Claim(ClaimTypes.Role, "Volunteer")
-            };
+        new Claim(ClaimTypes.Email, createdVolunteer.Gmail),
+        new Claim(ClaimTypes.NameIdentifier, createdVolunteer.Id.ToString()),
+        new Claim(ClaimTypes.Role, "Volunteer")
+    };
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
@@ -69,6 +77,7 @@ namespace MyProject1.Controllers
                 role = "Volunteer"
             });
         }
+
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Volunteer")]
