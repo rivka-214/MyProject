@@ -72,7 +72,7 @@ namespace Service.Services
         public async Task<List<CallsDto>> GetNearbyOpenCalls(double locationX, double locationY)
         {
             var calls = (await callsRepo.GetAll())
-                .Where(c => c.Status == "נפתחה")
+                .Where(c => c.Status == "Open")
                 .ToList();
 
             var callsWithDistance = calls

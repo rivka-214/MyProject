@@ -11,6 +11,7 @@ namespace Service.Interfaces
     {
         Task<List<VolunteerCallsDto>> GetActiveCallsForVolunteer(int volunteerId);
         Task<List<VolunteerCallsDto>> GetHistoryCallsForVolunteer(int volunteerId);
+        Task CompleteCallAsync(int callId, int volunteerId, int currentVolunteerId, CompleteCallDto dto);
 
         Task AssignNearbyVolunteersToCall(int callId, double locationX, double locationY);
 
@@ -25,5 +26,20 @@ namespace Service.Interfaces
         Task<VolunteerCallsDto> GetVolunteerCall(int callId, int volunteerId);
 
         public Task CheckAndReassignVolunteers();
+
+        /// <summary>
+        /// מחזיר עד 20 מתנדבים שהוקצו לקריאה מסוימת
+        /// </summary>
+        Task<List<VolunteersDto>> GetTop20VolunteersForCall(int callId);
+
+        /// <summary>
+        /// מחזיר את כל הקריאות שהוקצו למתנדב
+        /// </summary>
+        Task<List<CallsDto>> GetAllCallsForVolunteer(int volunteerId);
+
+        /// <summary>
+        /// מחזיר את כל הקריאות שהוקצו למתנדב לפי סטטוס
+        /// </summary>
+        Task<List<CallsDto>> GetCallsForVolunteerByStatus(int volunteerId, string status);
     }
 }

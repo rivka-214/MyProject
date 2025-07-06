@@ -9,22 +9,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace Service.Services
 {
     public class VolunteersCallService : IService<VolunteerCallsDto>, IVolunteersCallLogic
     {
         private readonly IRepository<VolunteerCalls> _repository;
-        private readonly IRepository<Calls> _callsRepository; // החלפה של ICallService
+        private readonly IRepository<Calls> _callsRepository;
         private readonly IMapper _mapper;
         private readonly IVolunteerLogic _volunteerLogic;
 
-
-
         public VolunteersCallService(
             IRepository<VolunteerCalls> repository,
-            IRepository<Calls> callsRepository, // הוספה
+            IRepository<Calls> callsRepository,
             IMapper mapper,
             IVolunteerLogic volunteerLogic)
         {
@@ -90,55 +87,6 @@ namespace Service.Services
 
 
 
-        //public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId, string summary = null)
-        //{
-        //    Console.WriteLine($"[Logic] callId={callId}, volunteerId={volunteerId}, status={status}, currentVolunteerId={currentVolunteerId}, summary={summary}");
-
-        //    if (string.IsNullOrEmpty(status))
-        //        throw new ArgumentException("status cannot be null or empty", nameof(status));
-
-        //    var allowed = new[] { "notified", "going", "cant", "arrived", "finished" };
-        //    if (!allowed.Contains(status))
-        //        throw new ArgumentException("Invalid status value", nameof(status));
-
-        //    if (volunteerId != currentVolunteerId) 
-        //        throw new UnauthorizedAccessException("אין הרשאה לעדכן מתנדב אחר");
-
-        //    var repo = _repository as VolunteersCallsRepository;
-        //    if (repo == null)
-        //        throw new Exception("שגיאה פנימית במסד הנתונים");
-
-        //    var exists = await repo.GetVolunteerCall(callId, volunteerId);
-        //    if (exists == null)
-        //        throw new Exception("המתנדב לא משויך לקריאה זו");
-
-        //    await repo.UpdateVolunteerStatus(callId, volunteerId, status,summary);
-
-        //    if (status == "arrived")
-        //    {
-        //        var call = await _callsRepository.GetById(callId);
-        //        if (call == null)
-        //            throw new System.Exception("קריאה לא נמצאה");
-
-        //        call.Status = "InProgress";
-        //        await _callsRepository.UpdateItem(callId, call);
-        //    }
-        //    else if (status == "finished")
-        //    {
-        //        var call = await _callsRepository.GetById(callId);
-        //        if (call == null)
-
-        //            throw new System.Exception("קריאה לא נמצאה");
-
-
-        //        if (!string.IsNullOrEmpty(summary))
-        //        {
-        //            call.Summary = summary;
-        //        }
-        //        call.Status = "Closed";
-        //        await _callsRepository.UpdateItem(callId, call);
-        //    }
-        //}
         public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId)
         {
             Console.WriteLine($"[Logic] callId={callId}, volunteerId={volunteerId}, status={status}, currentVolunteerId={currentVolunteerId}");
@@ -181,10 +129,31 @@ namespace Service.Services
                     call.Status = "InProgress";
                     await _callsRepository.UpdateItem(callId, call);
                 }
+
+                if (status == "going")
+                {
+                    var call = await _callsRepository.GetById(callId);
+                    if (call == null)
+                        throw new Exception("קריאה לא נמצאה");
+
+                    call.numVolanteer++;
+                    await _callsRepository.UpdateItem(callId, call);
+                }
             }
         }
 
+        public async Task CompleteCallAsync(int callId, int volunteerId, int currentVolunteerId, CompleteCallDto dto)
+        {
+            if (volunteerId != currentVolunteerId)
+                throw new UnauthorizedAccessException("אין הרשאה לעדכן מתנדב אחר");
 
+            await (_repository as VolunteersCallsRepository).CompleteCallAndUpdateVolunteers(
+                callId,
+                volunteerId,
+                dto.Summary,
+                dto.SentToHospital,
+                dto.HospitalName);
+        }
 
 
         public async Task<bool> ShouldSendToMoreVolunteers(int callId)
@@ -267,6 +236,34 @@ namespace Service.Services
             var historyCalls = await repo.GetHistoryCallsForVolunteer(volunteerId);
             return _mapper.Map<List<VolunteerCallsDto>>(historyCalls ?? new List<VolunteerCalls>());
         }
+        /// מחזיר את כל הקריאות שהוקצו למתנדב
+        public async Task<List<CallsDto>> GetAllCallsForVolunteer(int volunteerId)
+        {
+            var repo = _repository as VolunteersCallsRepository;
+            if (repo == null)
+                throw new Exception("שגיאה פנימית במסד הנתונים");
+
+            // שלוף את כל הקריאות של המתנדב (לא רק היסטוריות)
+            var volunteerCalls = await repo.GetAllCallsForVolunteer(volunteerId);
+            // תמפה ל-CallsDto (דרך ה-Calls של כל VolunteerCalls)
+            var calls = volunteerCalls
+                .Where(vc => vc.Calls != null)
+                .Select(vc => _mapper.Map<CallsDto>(vc.Calls))
+                .ToList();
+
+            return calls;
+        }
+
+        public async Task<List<CallsDto>> GetCallsForVolunteerByStatus(int volunteerId, string status)
+        {
+            var repo = _repository as VolunteersCallsRepository;
+            if (repo == null)
+                throw new Exception("שגיאה פנימית במסד הנתונים");
+
+            var calls = await repo.GetCallsForVolunteerByStatus(volunteerId, status);
+
+            return _mapper.Map<List<CallsDto>>(calls);
+        }
 
 
         public async Task CheckAndReassignVolunteers()
@@ -281,6 +278,14 @@ namespace Service.Services
             }
         }
 
-     
+        public async Task<List<VolunteersDto>> GetTop20VolunteersForCall(int callId)
+        {
+            var call = await _callsRepository.GetById(callId);
+            if (call == null)
+                throw new Exception("קריאה לא נמצאה");
+
+            var nearbyVolunteers = await _volunteerLogic.GetNearbyVolunteers(call.LocationX, call.LocationY);
+            return nearbyVolunteers.Take(20).ToList();
+        }
     }
 }

@@ -188,8 +188,64 @@ namespace Repository.Repositories
                 .FirstOrDefaultAsync(vc => vc.CallsId == callId && vc.VolunteerId == volunteerId);
         }
 
+        public async Task<List<Calls>> GetCallsForVolunteerByStatus(int volunteerId, string status)
+        {
+            return await context.VolunteerCallsDb
+                .Include(vc => vc.Calls)
+                .Where(vc => vc.VolunteerId == volunteerId && vc.VolunteerStatus == status)
+                .Select(vc => vc.Calls)
+                .ToListAsync();
+        }
+
+
+
+        public async Task<List<VolunteerCalls>> GetAllCallsForVolunteer(int volunteerId)
+        {
+            return await context.VolunteerCallsDb
+                .Where(vc => vc.VolunteerId == volunteerId)
+                .Include(vc => vc.Calls)
+                .ToListAsync();
+        }
+        public async Task CompleteCallAndUpdateVolunteers(int callId, int finishingVolunteerId, string summary, bool sentToHospital, string? hospitalName)
+        {
+            var finishingVolunteerCall = await GetVolunteerCall(callId, finishingVolunteerId);
+            if (finishingVolunteerCall == null)
+                throw new Exception("המתנדב לא משויך לקריאה זו");
+
+            // רק אם המתנדב הגיע (arrived)
+            if (finishingVolunteerCall.VolunteerStatus != "arrived")
+                throw new UnauthorizedAccessException("רק מתנדב שהגיע יכול לסגור את הקריאה");
+
+            finishingVolunteerCall.VolunteerStatus = "finished";
+            finishingVolunteerCall.ResponseTime = DateTime.UtcNow;
+
+            // עדכון כל המתנדבים האחרים שהיו ב"going" או "arrived" ל-"finished"
+            var otherVolunteerCalls = await context.VolunteerCallsDb
+                .Where(vc => vc.CallsId == callId
+                             && vc.VolunteerId != finishingVolunteerId
+                             && (vc.VolunteerStatus == "going" || vc.VolunteerStatus == "arrived"))
+                .ToListAsync();
+
+            foreach (var vc in otherVolunteerCalls)
+            {
+                vc.VolunteerStatus = "finished";
+            }
+
+            var call = await context.CallsDb.FirstOrDefaultAsync(c => c.Id == callId);
+            if (call == null)
+                throw new Exception("קריאה לא נמצאה");
+
+            call.Status = "Closed";
+            call.Summary = summary;
+            call.SentToHospital = sentToHospital;
+            call.HospitalName = hospitalName;
+
+            await context.SaveAsync();
+        }
 
     }
+
+
+
+
 }
-
-

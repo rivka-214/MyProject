@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Service.Interfaces;
+using Service.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -16,12 +17,18 @@ namespace MyProject1.Controllers
         private readonly IService<VolunteersDto> _service;
         private readonly IVolunteerLogic _serviceLogic;
         private readonly IConfiguration _config;
+        private readonly IVolunteersCallLogic _volunteerCallService; // Add this field
 
-        public VolunteerController(IService<VolunteersDto> service, IVolunteerLogic logic, IConfiguration config)
+        public VolunteerController(
+            IService<VolunteersDto> service,
+            IVolunteerLogic logic,
+            IConfiguration config,
+            IVolunteersCallLogic volunteerCallService) // Add this parameter
         {
             _service = service;
             _serviceLogic = logic;
             _config = config;
+            _volunteerCallService = volunteerCallService; // Initialize the field
         }
 
         [HttpGet]
@@ -30,28 +37,7 @@ namespace MyProject1.Controllers
         [HttpGet("{id}")]
         public async Task<VolunteersDto> Get(int id) => await _service.GetByIdAsync(id);
 
-        [HttpGet("nearby")]
-        public async Task<IActionResult> GetNearby(double locationX, double locationY)
-        {
-            var result = await _serviceLogic.GetNearbyVolunteers(locationX, locationY);
-            return Ok(result);
-        }
-
-        // ✅ נקודת API חדשה – מחזירה קריאות שקרובות למתנדב
-        [HttpGet("nearby-alerts")]
-        public async Task<IActionResult> GetNearbyAlerts([FromQuery] int id)
-        {
-            var volunteer = await _service.GetByIdAsync(id);
-            if (volunteer == null)
-                return NotFound("מתנדב לא נמצא");
-
-            if (volunteer.LocationX == null || volunteer.LocationY == null)
-                return BadRequest("למתנדב אין מיקום");
-
-            var calls = await _serviceLogic.GetNearbyOpenCalls(volunteer.LocationX.Value, volunteer.LocationY.Value);
-            return Ok(calls);
-        }
-
+       
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] VolunteersDto value)
         {
@@ -99,12 +85,12 @@ namespace MyProject1.Controllers
             return NoContent();
         }
 
-        [HttpGet("by-status")]
-        public async Task<IActionResult> GetCallsByStatus([FromQuery] string status)
-        {
-            var calls = await _serviceLogic.GetCallsByStatus(status);
-            return Ok(calls);
-        }
+        //[HttpGet("by-status")]
+        //public async Task<IActionResult> GetCallsByStatus([FromQuery] string status)
+        //{
+        //    var calls = await _serviceLogic.GetCallsByStatus(status);
+        //    return Ok(calls);
+        //}
 
         [HttpGet("exists")]
         public async Task<IActionResult> CheckVolunteerExists([FromQuery] string gmail)
@@ -112,6 +98,24 @@ namespace MyProject1.Controllers
             var volunteers = await _service.GetAllAsync();
             var exists = volunteers.Any(v => v.Gmail == gmail);
             return Ok(new { exists });
+        }
+        //כל הקריאות שהוקצו למתנדב
+        [HttpGet("{volunteerId}/calls")]
+        public async Task<ActionResult<List<CallsDto>>> GetCallsForVolunteer(int volunteerId)
+        {
+            var calls = await _volunteerCallService.GetAllCallsForVolunteer(volunteerId);
+            if (calls == null || !calls.Any())
+                return NotFound(new { error = "לא נמצאו קריאות למתנדב זה" });
+            return Ok(calls);
+        }
+        //כל הקריאות למתנדב מסויים לפי סטטוס
+        [HttpGet("{volunteerId}/calls/by-status/{status}")]
+        public async Task<ActionResult<List<CallsDto>>> GetCallsForVolunteerByStatus(int volunteerId, string status)
+        {
+            var calls = await _volunteerCallService.GetCallsForVolunteerByStatus(volunteerId, status);
+            if (!calls.Any())
+                return NotFound(new { error = "לא נמצאו קריאות לסטטוס זה" });
+            return Ok(calls);
         }
     }
 }

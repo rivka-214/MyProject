@@ -15,11 +15,13 @@ namespace MyProject1.Controllers
     {
         private readonly ICallService _callService;
         private readonly IService<CallsDto> _service;
+        private readonly IVolunteersCallLogic _volunteerCallService; // Add this field
 
-        public CallsController(ICallService callService, IService<CallsDto> service)
+        public CallsController(ICallService callService, IService<CallsDto> service, IVolunteersCallLogic volunteerCallService)
         {
             _callService = callService;
             _service = service;
+            _volunteerCallService = volunteerCallService;
         }
 
         // GET: api/Calls
@@ -137,21 +139,7 @@ namespace MyProject1.Controllers
             }
         }
 
-        // PUT: api/Calls/5/status
-        [HttpPut("{id}/status")]
-        public async Task<ActionResult> UpdateStatus(int id, [FromBody] StatusDto statusDto)
-        {
-            try
-            {
-                await _callService.UpdateStatus(id, statusDto.Status);
-                return Ok();
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-        }
-
+     
         // PUT: api/Calls/5/complete
         [HttpPut("{id}/complete")]
         [Authorize(Roles = "Volunteer")]
@@ -185,6 +173,15 @@ namespace MyProject1.Controllers
             Console.WriteLine($"Found {calls.Count} calls for user.");
 
             return Ok(calls);
+        }
+
+        [HttpGet("{callId}/volunteers")]
+        public async Task<ActionResult<List<VolunteersDto>>> GetTop20VolunteersForCall(int callId)
+        {
+            var volunteers = await _volunteerCallService.GetTop20VolunteersForCall(callId);
+            if (!volunteers.Any())
+                return NotFound(new { error = "לא נמצאו מתנדבים לקריאה זו" });
+            return Ok(volunteers);
         }
     }
 }

@@ -35,8 +35,10 @@ namespace Service.Services
 
             
             CreateMap<Volunteers, VolunteersDto>().ReverseMap();
+            CreateMap<VolunteerCalls, CallsDto>();
+            CreateMap<Calls, CallsDto>();
 
- 
+
 
             CreateMap<User, UserDto>().ReverseMap();
         }

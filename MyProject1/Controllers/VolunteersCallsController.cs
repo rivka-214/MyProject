@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
+using Service.Services;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace MyProject1.Controllers
 {
@@ -118,24 +119,7 @@ namespace MyProject1.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-
-        [HttpPost("respond")]
-        public async Task<ActionResult> RespondToCall([FromBody] VolunteerResponseDto request)
-        {
-            try
-            {
-                // תיקון ה-claim
-                var currentVolunteerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                Console.WriteLine($"[Controller] CallId={request.CallId}, VolunteerId={request.VolunteerId}, Response={request.Response}, currentVolunteerId={currentVolunteerId}");
-                await _volunteerCallService.UpdateVolunteerStatus(request.CallId, request.VolunteerId, request.Response, currentVolunteerId);
-                return Ok(new { message = "תגובה נשמרה בהצלחה" });
-            }
-            catch (System.Exception ex)
-            {
-                Console.WriteLine("[Controller][ERROR] " + ex);
-                return BadRequest(new { error = ex.Message });
-            }
-        }
+        //עידכון הסטטוס של מתנדב לקריאה מסויימת
 
         [HttpPut("{callId}/{volunteerId}/status")]
         public async Task<ActionResult> UpdateVolunteerStatus(int callId, int volunteerId, [FromBody] UpdateVolunteerStatusDto request)
@@ -153,7 +137,7 @@ namespace MyProject1.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-
+    //    אינפומציה על הקיראה
         [HttpGet("{callId}/info")]
         public async Task<ActionResult<CallVolunteersInfoDto>> GetCallVolunteersInfo(int callId)
         {
@@ -167,7 +151,7 @@ namespace MyProject1.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-
+//קבלת כל הקריאות למתנדב מסיום
         [HttpGet("by-volunteer/{volunteerId}")]
         public async Task<ActionResult<List<VolunteerCallsDto>>> GetCallsByVolunteer(int volunteerId)
         {
@@ -175,7 +159,7 @@ namespace MyProject1.Controllers
             {
                 var allCalls = await _service.GetAllAsync();
                 var filtered = allCalls
-                    .Where(vc => vc.VolunteerId == volunteerId && vc.VolunteerStatus == "notified")
+                    .Where(vc => vc.VolunteerId == volunteerId)
                     .ToList();
                 return Ok(filtered);
             }
@@ -184,5 +168,27 @@ namespace MyProject1.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+        [HttpPut("{callId:int}/{volunteerId:int}/complete")]
+        [Authorize(Roles = "Volunteer")]
+        public async Task<IActionResult> CompleteCall(int callId, int volunteerId, [FromBody] CompleteCallDto dto)
+        {
+            try
+            {
+                int currentVolunteerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+
+                await _volunteerCallService.CompleteCallAsync(callId, volunteerId, currentVolunteerId, dto);
+
+                return Ok(new { message = "הקריאה נסגרה בהצלחה" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
     }
 }
