@@ -13,6 +13,7 @@ namespace Reposetory.Entities
 
     public class Calls
     {
+        [Key]
         public int Id { get; set; }
         [Required]
         public double LocationX { get; set; }

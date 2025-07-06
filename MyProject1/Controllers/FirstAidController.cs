@@ -4,7 +4,6 @@ using Service.Services;
 
 [ApiController]
 [Route("api/[controller]")]
-  
 public class FirstAidController : ControllerBase
 {
     private readonly IFirstAidGuideService _guideService;
@@ -23,11 +22,10 @@ public class FirstAidController : ControllerBase
         return Ok(guides);
     }
 
-
     [HttpGet("all")]
-    public async Task<ActionResult<List<FirstAidGuide>>> All()
+    public ActionResult<List<FirstAidGuide>> All()
     {
-        var guides = await Task.FromResult(_guideService.GetAll());
+        var guides = _guideService.GetAll();
         return Ok(guides);
     }
 
@@ -37,4 +35,5 @@ public class FirstAidController : ControllerBase
         var result = await _openAiService.GetFirstAidInstructionsAsync(description);
         return Ok(result);
     }
+
 }

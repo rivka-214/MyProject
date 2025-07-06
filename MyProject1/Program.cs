@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Common.Dto;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Mock;
@@ -12,11 +13,17 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ✅ Load configuration
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
+
+// ✅ Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Swagger + JWT Security
+// ✅ Swagger + JWT Security
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
@@ -58,32 +65,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ✅ Register IHttpContextAccessor
-builder.Services.AddHttpContextAccessor();
-
-// ✅ Add DB context (mocked)
-builder.Services.AddDbContext<IContext, Database>();
-builder.Services.AddScoped<IUserServicecs, UserService>();
-// ✅ AutoMapper
-builder.Services.AddAutoMapper(typeof(MyMapper));
-builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
-builder.Services.AddScoped<IFirstAidGuideService, FirstAidGuideService>();
-// ✅ VolunteersCallService - Multi-Interface registration
-builder.Services.AddScoped<VolunteersCallService>();
-builder.Services.AddScoped<IVolunteersCallLogic>(sp => sp.GetRequiredService<VolunteersCallService>());
-builder.Services.AddScoped<IService<VolunteerCallsDto>>(sp => sp.GetRequiredService<VolunteersCallService>());
-builder.Services.AddScoped<ICallsRepository, CallsRepository>();
-builder.Services.AddScoped<ICallService, CallService>();
-// ✅ CallService - with Func for circular dependency
-builder.Services.AddScoped<Func<IVolunteersCallLogic>>(sp => () => sp.GetRequiredService<IVolunteersCallLogic>());
-builder.Services.AddScoped<ICallService, CallService>();
-builder.Services.AddScoped<IService<CallsDto>>(sp => (IService<CallsDto>)sp.GetRequiredService<ICallService>());
-
-// ✅ Add general services (optional)
-builder.Services.AddServices();
-builder.Services.AddSignalR();
-builder.Services.AddHttpContextAccessor();
-
 // ✅ JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -102,17 +83,36 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 
-// Load appsettings.Development.json
-builder.Configuration
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-    .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
+// ✅ General services
+builder.Services.AddAutoMapper(typeof(MyMapper));
+builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSignalR();
+builder.Services.AddServices(); // הרחבה כללית אם קיימת
 
-// Add services to the container.
-builder.Services.AddControllers();
+// ✅ Gemini / AI services
+builder.Services.AddSingleton<IOpenAiService, GeminiService>();
+builder.Services.AddSingleton<IGeminiService, GeminiService>();
+
+// ✅ First aid + calls logic
+builder.Services.AddScoped<IFirstAidGuideService, FirstAidGuideService>();
+builder.Services.AddScoped<VolunteersCallService>();
+builder.Services.AddScoped<IVolunteersCallLogic>(sp => sp.GetRequiredService<VolunteersCallService>());
+builder.Services.AddScoped<IService<VolunteerCallsDto>>(sp => sp.GetRequiredService<VolunteersCallService>());
+builder.Services.AddScoped<ICallService, CallService>();
+builder.Services.AddScoped<IService<CallsDto>>(sp => sp.GetRequiredService<ICallService>());
+builder.Services.AddScoped<ICallsRepository, CallsRepository>();
+
+// ✅ User + DB context
+builder.Services.AddScoped<IUserServicecs, UserService>();
+builder.Services.AddDbContext<IContext, Database>();
+
+// ✅ Resolve circular dependency
+builder.Services.AddScoped<Func<IVolunteersCallLogic>>(sp => () => sp.GetRequiredService<IVolunteersCallLogic>());
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ✅ Middleware pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -120,14 +120,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// ✅ Enable CORS
 app.UseCors("AllowReactApp");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-// app.MapHub<VolunteersHub>("/volunteersHub"); // Uncomment if using SignalR
+// app.MapHub<VolunteersHub>("/volunteersHub"); // אם תשתמשי ב-SignalR
 
 app.Run();
