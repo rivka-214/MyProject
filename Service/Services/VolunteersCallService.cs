@@ -116,10 +116,15 @@ namespace Service.Services
             if (exists == null)
                 throw new Exception("המתנדב לא משויך לקריאה זו");
 
-            // 🚫 לא לאפשר arrived לפני going
+            // מניעת מעבר ל-arrived אם לא היה going קודם
             if (status == "arrived" && exists.VolunteerStatus != "going")
                 throw new InvalidOperationException("לא ניתן לעדכן ל-'arrived' לפני שהסטטוס הוא 'going'");
 
+            // מניעת מעבר ל-going אם לא היה notified קודם
+            if (status == "going" && exists.VolunteerStatus != "notified")
+                throw new InvalidOperationException("לא ניתן לעדכן ל-'going' לפני שהסטטוס הוא 'notified'");
+
+            // עדכון הסטטוס של המתנדב
             await repo.UpdateVolunteerStatus(callId, volunteerId, status);
 
             if (status == "arrived")
