@@ -35,6 +35,7 @@ namespace Service.Services
         }
         public async Task<CallsDto> AddItemAsync(CallsDto item)
         {
+
             var entity = mapper.Map<Calls>(item);
             var added = await repository.AddItem(entity);
             return mapper.Map<CallsDto>(added);
@@ -107,6 +108,9 @@ namespace Service.Services
         }
         public async Task<CallsDto> CreateCallAsync(CallsDto call)
         {
+            // נטר את ה-Id כדי לוודא שמדובר ביצירה חדשה
+            call.Id = 0;
+
             // העלאת תמונה אם קיימת
             if (call.FileImage != null)
             {
@@ -143,6 +147,7 @@ namespace Service.Services
 
             return savedCall;
         }
+
 
         private async Task<string> UploadImage(IFormFile file)
         {
