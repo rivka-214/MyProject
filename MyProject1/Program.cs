@@ -31,7 +31,7 @@ builder.Services.AddSwaggerGen(option =>
         BearerFormat = "JWT",
         Scheme = "Bearer"
     });
-    builder.Services.AddHttpClient<FirstAidAiService>();
+  
     option.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {

@@ -71,10 +71,18 @@ namespace Repository.Repositories
         /// מחזיר קריאות פעילות למתנדב ספציפי (going, arrived)
         /// </summary>
 
-        public async Task<List<VolunteerCalls>> GetActiveCallsForVolunteer(int volunteerId)
+        public async Task<List<VolunteerCalls>> 
+            GetActiveCallsForVolunteer(int volunteerId)
         {
             return await context.VolunteerCallsDb
                 .Where(vc => vc.VolunteerId == volunteerId && vc.VolunteerStatus != "cant" && vc.VolunteerStatus != "finished"&& vc.VolunteerStatus != "notified")
+                .Include(vc => vc.Calls)
+                .ToListAsync();
+        }
+        public async Task<List<VolunteerCalls>> GetnotifiedCallsForVolunteer(int volunteerId)
+        {
+            return await context.VolunteerCallsDb
+                .Where(vc => vc.VolunteerId == volunteerId && vc.VolunteerStatus == "notified" )
                 .Include(vc => vc.Calls)
                 .ToListAsync();
         }
@@ -111,33 +119,6 @@ namespace Repository.Repositories
                 await context.SaveAsync();
             }
         }
-
-
-        public async Task UpdateVolunteerFinish(int callId, int volunteerId, string summary)
-        {
-            Console.WriteLine($"[Repo] UpdateVolunteerFinish - callId={callId}, volunteerId={volunteerId}, summary={summary}");
-
-            if (string.IsNullOrEmpty(summary))
-                throw new ArgumentException("summary is required to finish the call", nameof(summary));
-
-            var call = await GetVolunteerCall(callId, volunteerId);
-            if (call == null)
-                throw new Exception("המתנדב לא משויך לקריאה זו");
-
-            call.VolunteerStatus = "finished";
-            call.ResponseTime = DateTime.UtcNow;
-
-            var mainCall = await context.CallsDb.FirstOrDefaultAsync(c => c.Id == callId);
-            if (mainCall == null)
-                throw new Exception("קריאה לא נמצאה");
-
-            mainCall.Status = "Closed";
-            mainCall.Summary = summary;
-
-            await context.SaveAsync();
-        }
-
-
         /// <summary>
         /// מחזיר כמה מתנדבים יצאו לקריאה ספציפית
         /// </summary>

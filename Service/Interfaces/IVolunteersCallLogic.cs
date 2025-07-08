@@ -9,7 +9,8 @@ namespace Service.Interfaces
 {
     public interface IVolunteersCallLogic
     {
-        Task<List<VolunteerCallsDto>> GetActiveCallsForVolunteer(int volunteerId);
+        Task<List<VolunteerCallsDto>> GetActiveCallsForVolunteer(int volunteerId); 
+        Task<List<VolunteerCallsDto>> GetnotifiedCallsForVolunteer(int volunteerId);
         Task<List<VolunteerCallsDto>> GetHistoryCallsForVolunteer(int volunteerId);
         Task CompleteCallAsync(int callId, int volunteerId, int currentVolunteerId, CompleteCallDto dto);
 

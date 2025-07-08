@@ -10,7 +10,7 @@ namespace Service.Services
     public class VolunteerReassignBackgroundService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly TimeSpan _interval = TimeSpan.FromMinutes(5); // כל 5 דקות
+        private readonly TimeSpan _interval = TimeSpan.FromMinutes(1); // כל 5 דקות
 
         public VolunteerReassignBackgroundService(IServiceProvider serviceProvider)
         {

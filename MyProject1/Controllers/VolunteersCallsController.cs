@@ -105,6 +105,19 @@ namespace MyProject1.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+        [HttpGet("notified/{volunteerId}")]
+        public async Task<ActionResult<List<VolunteerCallsDto>>> GetnotifiedCalls(int volunteerId)
+        {
+            try
+            {
+                var activeCalls = await _volunteerCallService.GetnotifiedCallsForVolunteer(volunteerId);
+                return Ok(activeCalls);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
 
         [HttpGet("history/{volunteerId}")]
         public async Task<ActionResult<List<VolunteerCallsDto>>> GetHistoryCalls(int volunteerId)

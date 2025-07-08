@@ -94,7 +94,6 @@ namespace Service.Services
 
 
 
-       
         public async Task UpdateVolunteerStatus(int callId, int volunteerId, string status, int currentVolunteerId)
         {
             Console.WriteLine($"[Logic] callId={callId}, volunteerId={volunteerId}, status={status}, currentVolunteerId={currentVolunteerId}");
@@ -102,7 +101,7 @@ namespace Service.Services
             if (string.IsNullOrEmpty(status))
                 throw new ArgumentException("status cannot be null or empty", nameof(status));
 
-            var allowed = new[] { "notified", "going", "cant", "arrived", "finished" };
+            var allowed = new[] { "notified", "going", "cant", "arrived" };
             if (!allowed.Contains(status))
                 throw new ArgumentException("Invalid status value", nameof(status));
 
@@ -117,32 +116,33 @@ namespace Service.Services
             if (exists == null)
                 throw new Exception("המתנדב לא משויך לקריאה זו");
 
-     
-            else
+            // 🚫 לא לאפשר arrived לפני going
+            if (status == "arrived" && exists.VolunteerStatus != "going")
+                throw new InvalidOperationException("לא ניתן לעדכן ל-'arrived' לפני שהסטטוס הוא 'going'");
+
+            await repo.UpdateVolunteerStatus(callId, volunteerId, status);
+
+            if (status == "arrived")
             {
-                await repo.UpdateVolunteerStatus(callId, volunteerId, status);
+                var call = await _callsRepository.GetById(callId);
+                if (call == null)
+                    throw new Exception("קריאה לא נמצאה");
 
-                if (status == "arrived")
-                {
-                    var call = await _callsRepository.GetById(callId);
-                    if (call == null)
-                        throw new Exception("קריאה לא נמצאה");
+                call.Status = "InProgress";
+                await _callsRepository.UpdateItem(callId, call);
+            }
 
-                    call.Status = "InProgress";
-                    await _callsRepository.UpdateItem(callId, call);
-                }
+            if (status == "going")
+            {
+                var call = await _callsRepository.GetById(callId);
+                if (call == null)
+                    throw new Exception("קריאה לא נמצאה");
 
-                if (status == "going")
-                {
-                    var call = await _callsRepository.GetById(callId);
-                    if (call == null)
-                        throw new Exception("קריאה לא נמצאה");
-
-                    call.numVolanteer++;
-                    await _callsRepository.UpdateItem(callId, call);
-                }
+                call.numVolanteer++;
+                await _callsRepository.UpdateItem(callId, call);
             }
         }
+
 
         public async Task CompleteCallAsync(int callId, int volunteerId, int currentVolunteerId, CompleteCallDto dto)
         {
@@ -228,6 +228,16 @@ namespace Service.Services
             var activeCalls = await repo.GetActiveCallsForVolunteer(volunteerId);
             return _mapper.Map<List<VolunteerCallsDto>>(activeCalls ?? new List<VolunteerCalls>());
         }
+        public async Task<List<VolunteerCallsDto>> GetnotifiedCallsForVolunteer(int volunteerId)
+        {
+            var repo = _repository as VolunteersCallsRepository;
+            if (repo == null)
+                throw new Exception("שגיאה פנימית במסד הנתונים");
+
+            var notifiedCalls = await repo.GetnotifiedCallsForVolunteer(volunteerId);
+            return _mapper.Map<List<VolunteerCallsDto>>(notifiedCalls ?? new List<VolunteerCalls>());
+        }
+
 
         public async Task<List<VolunteerCallsDto>> GetHistoryCallsForVolunteer(int volunteerId)
         {
