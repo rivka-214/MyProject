@@ -5,6 +5,8 @@ using Service.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MyProject1.Controllers
 {
@@ -24,9 +26,14 @@ namespace MyProject1.Controllers
         [HttpPost("/VolunteerLogin")]
         public async Task<IActionResult> Login([FromBody] VolunteerLogin value)
         {
+            if (string.IsNullOrEmpty(value.Gmail) || string.IsNullOrEmpty(value.Password))
+            {
+                return BadRequest("מייל וסיסמה הם שדות חובה.");
+            }
+
             var volunteer = await Authenticate(value);
             if (volunteer == null)
-                return Unauthorized("Invalid credentials");
+                return Unauthorized("שם משתמש או סיסמה שגויים.");
 
             var token = Generate(volunteer);
             return Ok(new
@@ -100,6 +107,7 @@ namespace MyProject1.Controllers
         private async Task<VolunteersDto?> Authenticate(VolunteerLogin value)
         {
             var volunteers = await service.GetAllAsync();
+            // כאן רצוי להשתמש בהצפנת סיסמאות / Hash בפועל
             return volunteers.FirstOrDefault(x => x.Gmail == value.Gmail && x.Password == value.Password);
         }
     }

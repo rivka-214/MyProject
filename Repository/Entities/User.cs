@@ -9,6 +9,7 @@ namespace Repository.Entities
     public class User
     {
         public int Id { get; set; } // מפתח ראשי
+        //public string UserId { get; set; } // 🆕 חדש
         public string FirstName { get; set; }
         public string LastNAme { get; set; }
         public string PhoneNumber { get; set; }

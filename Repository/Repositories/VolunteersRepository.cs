@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Repository.Repositories
 {
-    public class VolunteersRepository : IRepository<Volunteers>
+    public class VolunteersRepository : IRepository<Volunteers>, IVolunteer
     {
         private readonly IContext context;
         public VolunteersRepository(IContext context)
@@ -50,6 +50,22 @@ namespace Repository.Repositories
             Volunteer.Specialization = item.Specialization;
 
             await context.SaveAsync();
+        }
+
+        public async Task<List<Volunteers>> GetVolunteersNotAssignedToCall(int callId)
+        {
+            var allWithLocation = await context.VolunteersDb
+                .Where(v => v.LocationX.HasValue && v.LocationY.HasValue)
+                .ToListAsync();
+
+            var assignedIds = await context.VolunteerCallsDb
+                .Where(vc => vc.CallsId == callId)
+                .Select(vc => vc.VolunteerId)
+                .ToListAsync();
+
+            return allWithLocation
+                .Where(v => !assignedIds.Contains(v.Id))
+                .ToList();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MyProject.Services;
 using System.Threading.Tasks;
 
@@ -6,6 +7,7 @@ namespace MyProject.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class FirstAidController : ControllerBase
     {
         private readonly FirstAidAiService _firstAidService;

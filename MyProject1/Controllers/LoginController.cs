@@ -5,6 +5,9 @@ using Service.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.ComponentModel.DataAnnotations; // להוספת בדיקות תקינות
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace MyProject1.Controllers
 {
@@ -21,20 +24,37 @@ namespace MyProject1.Controllers
             this.config = config;
         }
 
-        // רישום משתמש חדש
+        // רישום משתמש חדש עם בדיקות תקינות
         [HttpPost]
-        public async Task<UserDto> Post([FromBody] UserDto value)
+        public async Task<IActionResult> Post([FromBody] UserDto value)
         {
-            return await service.AddItemAsync(value);
+            // בדיקת תקינות אוטומטית לפי Data Annotations (יש להוסיף אותן ל-UserDto)
+            if (!TryValidateModel(value))
+            {
+                return BadRequest(ModelState);
+            }
+
+            // בדיקה אם משתמש עם המייל כבר קיים (אפשר לשפר עם שירות יעודי)
+            var users = await service.GetAllAsync();
+            if (users.Any(u => u.Gmail == value.Gmail))
+                return BadRequest("כתובת המייל כבר רשומה במערכת.");
+
+            var createdUser = await service.AddItemAsync(value);
+            return Ok(createdUser);
         }
 
         // התחברות משתמש
         [HttpPost("/login")]
         public async Task<IActionResult> Login([FromBody] UserLogin value)
         {
+            if (string.IsNullOrEmpty(value.Gmail) || string.IsNullOrEmpty(value.password))
+            {
+                return BadRequest("מייל וסיסמה הינם שדות חובה.");
+            }
+
             var user = await Authenticate(value);
             if (user == null)
-                return Unauthorized("Invalid credentials");
+                return Unauthorized("שם משתמש או סיסמה שגויים.");
 
             var token = Generate(user);
             return Ok(new
@@ -72,6 +92,7 @@ namespace MyProject1.Controllers
         private async Task<UserDto?> Authenticate(UserLogin value)
         {
             var users = await service.GetAllAsync();
+            // חשוב: הסיסמה חייבת להיות מאובטחת! כאן זה במפורש, בפועל השתמשו בהצפנה או Hash
             return users.FirstOrDefault(x => x.password == value.password && x.Gmail == value.Gmail);
         }
     }

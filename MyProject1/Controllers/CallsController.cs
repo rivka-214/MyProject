@@ -15,7 +15,7 @@ namespace MyProject1.Controllers
     {
         private readonly ICallService _callService;
         private readonly IService<CallsDto> _service;
-        private readonly IVolunteersCallLogic _volunteerCallService; // Add this field
+        private readonly IVolunteersCallLogic _volunteerCallService;
 
         public CallsController(ICallService callService, IService<CallsDto> service, IVolunteersCallLogic volunteerCallService)
         {
@@ -24,7 +24,6 @@ namespace MyProject1.Controllers
             _volunteerCallService = volunteerCallService;
         }
 
-        // GET: api/Calls
         [HttpGet]
         public async Task<ActionResult<List<CallsDto>>> Get()
         {
@@ -39,7 +38,6 @@ namespace MyProject1.Controllers
             }
         }
 
-        // GET: api/Calls/5
         [HttpGet("{id}")]
         public async Task<ActionResult<CallsDto>> Get(int id)
         {
@@ -56,12 +54,14 @@ namespace MyProject1.Controllers
             }
         }
 
-        // POST: api/Calls
         [HttpPost]
         public async Task<ActionResult<CallsDto>> Post([FromForm] CallsDto call)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
                 var savedCall = await _callService.AddCallAsync(call, Request.Form.Files.FirstOrDefault());
                 return Ok(savedCall);
             }
@@ -71,12 +71,14 @@ namespace MyProject1.Controllers
             }
         }
 
-        // PUT: api/Calls/5
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, [FromBody] CallsDto value)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
                 var existing = await _callService.GetByIdAsync(id);
                 if (existing == null)
                     return NotFound(new { error = "קריאה לא נמצאה" });
@@ -90,7 +92,6 @@ namespace MyProject1.Controllers
             }
         }
 
-        // DELETE: api/Calls/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
@@ -109,7 +110,6 @@ namespace MyProject1.Controllers
             }
         }
 
-        // GET: api/Calls/status/5
         [HttpGet("status/{id}")]
         public async Task<ActionResult<string>> GetCallStatus(int id)
         {
@@ -124,7 +124,6 @@ namespace MyProject1.Controllers
             }
         }
 
-        // POST: api/Calls/5/assign-nearby
         [HttpPost("{callId}/assign-nearby")]
         public async Task<ActionResult> AssignNearbyVolunteers(int callId, [FromQuery] double locationX, [FromQuery] double locationY)
         {
@@ -139,8 +138,6 @@ namespace MyProject1.Controllers
             }
         }
 
-     
-    
         [HttpGet("by-user")]
         [Authorize]
         public async Task<ActionResult<List<CallsDto>>> GetCallsByUser()

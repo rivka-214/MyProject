@@ -82,6 +82,8 @@ builder.Services.AddScoped<IVolunteersCallLogic>(sp => sp.GetRequiredService<Vol
 builder.Services.AddScoped<IService<VolunteerCallsDto>>(sp => sp.GetRequiredService<VolunteersCallService>());
 builder.Services.AddScoped<ICallsRepository, CallsRepository>();
 builder.Services.AddScoped<ICallService, CallService>();
+builder.Services.AddScoped<IVolunteer, VolunteersRepository>();
+
 // ✅ CallService - with Func for circular dependency
 builder.Services.AddScoped<Func<IVolunteersCallLogic>>(sp => () => sp.GetRequiredService<IVolunteersCallLogic>());
 builder.Services.AddScoped<ICallService, CallService>();
