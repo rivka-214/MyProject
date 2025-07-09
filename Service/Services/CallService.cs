@@ -83,23 +83,7 @@ namespace Service.Services
             call.Status = status;
             await repository.UpdateItem(id, call);
         }
-        public async Task CompleteCall(int id, CompleteCallDto dto, int volunteerId)
-        {
-            var call = await repository.GetById(id);
-            if (call == null)
-                throw new System.Exception("קריאה לא נמצאה");
-
-            var volunteerStatus = await _volunteerCallLogic.GetVolunteerStatus(id, volunteerId);
-            if (volunteerStatus != "arrived")
-                throw new System.Exception("רק מתנדב שהגיע יכול לסגור קריאה");
-
-            // עדכון סטטוס המתנדב ל-finished
-            await _volunteerCallLogic.UpdateVolunteerStatus(id, volunteerId, "finished", volunteerId);
-
-            call.Summary = dto.Summary;
-            call.Status = "Closed";
-            await repository.UpdateItem(id, call);
-        }
+     
         public async Task<List<CallsDto>> GetCallsByUserId(int userId)
         {
             var userCalls = await _Callrepository.GetCallsByUserId(userId);

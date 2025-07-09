@@ -1,10 +1,10 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using Common.Dto;
 using Microsoft.EntityFrameworkCore;
 using Reposetory.Entities;
 using Repository.Entities;
 using Repository.Interfacese;
+using Repository.Repositories;
 using Service.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -17,14 +17,18 @@ namespace Service.Services
     public class VolunteerLogic : IVolunteerLogic
     {
         private readonly IRepository<Volunteers> volunteerRepo;
+        private readonly IVolunteer IvolunteerRepo;
+
         private readonly IRepository<Calls> callsRepo;
         private readonly IMapper mapper;
 
         public VolunteerLogic(
+            IVolunteer volunteer,
             IRepository<Volunteers> volunteerRepo,
             IRepository<Calls> callsRepo,
             IMapper mapper)
         {
+            IvolunteerRepo = volunteer;
             this.volunteerRepo = volunteerRepo;
             this.callsRepo = callsRepo;
             this.mapper = mapper;
@@ -98,11 +102,43 @@ namespace Service.Services
             return mapper.Map<List<CallsDto>>(calls);
         }
 
-        private double Distance(double x1, double y1, double x2, double y2)
+        public async Task<List<VolunteersDto>> GetNearbyVolunteersNotAssigned(int callId, double locationX, double locationY, int count = 10)
         {
-            var dx = x1 - x2;
-            var dy = y1 - y2;
-            return Math.Sqrt(dx * dx + dy * dy);
+            var unassignedVolunteers = await IvolunteerRepo.GetVolunteersNotAssignedToCall(callId);
+
+            var sorted = unassignedVolunteers
+                .Where(v => v.LocationX.HasValue && v.LocationY.HasValue) // Ensure non-null values
+                .Select(v => new
+                {
+                    Volunteer = v,
+                    Distance = Distance(
+                        locationX, locationY,
+                        v.LocationX.Value, v.LocationY.Value) // Use .Value to access double
+                })
+                .OrderBy(x => x.Distance)
+                .Take(count)
+                .Select(x => x.Volunteer)
+                .ToList();
+
+            return mapper.Map<List<VolunteersDto>>(sorted);
+        }
+
+        // נוסחת Haversine לחישוב מרחק גאוגרפי מדויק בין שתי נקודות
+        private double Distance(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double R = 6371e3; // רדיוס כדור הארץ במטרים
+            double φ1 = lat1 * Math.PI / 180;
+            double φ2 = lat2 * Math.PI / 180;
+            double Δφ = (lat2 - lat1) * Math.PI / 180;
+            double Δλ = (lon2 - lon1) * Math.PI / 180;
+
+            double a = Math.Sin(Δφ / 2) * Math.Sin(Δφ / 2) +
+                       Math.Cos(φ1) * Math.Cos(φ2) *
+                       Math.Sin(Δλ / 2) * Math.Sin(Δλ / 2);
+            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+            double d = R * c; // מרחק במטרים
+            return d;
         }
 
         private async Task<(double lat, double lng)> GetCoordinatesFromAddress(string address)
