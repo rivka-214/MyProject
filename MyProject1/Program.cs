@@ -10,6 +10,7 @@ using Repository.Interfacese;
 using Repository.Repositories;
 using Service.Interfaces;
 using Service.Services;
+using System;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +24,10 @@ builder.Configuration
 // ✅ Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<FirstAidAiService>();
 
+builder.Services.AddHttpClient<FirstAidAiService>();
+//builder.Services.AddScoped<IFirstAidAiService, FirstAidAiService>();
 // ✅ Swagger + JWT Security
 builder.Services.AddSwaggerGen(option =>
 {
@@ -74,7 +78,7 @@ builder.Services.AddDbContext<IContext, Database>();
 builder.Services.AddScoped<IUserServicecs, UserService>();
 // ✅ AutoMapper
 builder.Services.AddAutoMapper(typeof(MyMapper));
-builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
+
 
 // ✅ VolunteersCallService - Multi-Interface registration
 builder.Services.AddScoped<VolunteersCallService>();
@@ -110,7 +114,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
-
+builder.Services.AddScoped<OpenAiService>();
+// או
+builder.Services.AddScoped<OpenAiService, OpenAiService>();
 // Load appsettings.Development.json
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())

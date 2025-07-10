@@ -5,14 +5,10 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Service.Services;
 
-namespace Service.Services
+namespace MyProject.Services
 {
-    public interface IOpenAiService
-    {
-        Task<string> GetFirstAidInstructionsAsync(string description);
-    }
-
     public class OpenAiService : IOpenAiService
     {
         private readonly HttpClient _httpClient;
@@ -21,27 +17,26 @@ namespace Service.Services
         public OpenAiService(HttpClient httpClient, IConfiguration config)
         {
             _httpClient = httpClient;
-
             _apiKey = config["OpenAI:ApiKey"]
                       ?? throw new Exception("Missing OpenAI API Key in configuration");
-
-            Console.WriteLine($"🔑 Loaded OpenAI API Key: {_apiKey.Substring(0, 8)}..."); // רק חלק מהמפתח להדפסה
         }
 
         public async Task<string> GetFirstAidInstructionsAsync(string description)
         {
-            var url = "https://api.openai.com/v1/chat/completions";
+            var url = "https://chat-api.malkabruk.co.il/openai";
+
 
             var requestBody = new
             {
                 model = "gpt-4",
                 messages = new[]
                 {
-            new {
-                role = "user",
-                content = $"אתה מתמחה בעזרה ראשונה. כתוב הוראות עזרה ראשונה למקרה הבא:\n{description}\nבקצרה ועם דגש על מה לעשות עכשיו."
-            }
-        },
+                    new
+                    {
+                        role = "user",
+                        content = $"אתה מתמחה בעזרה ראשונה. כתוב הוראות עזרה ראשונה למקרה הבא:\n{description}\nבקצרה ועם דגש על מה לעשות עכשיו."
+                    }
+                },
                 max_tokens = 500,
                 temperature = 0.3
             };
@@ -52,7 +47,6 @@ namespace Service.Services
             httpRequest.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.SendAsync(httpRequest);
-
             var responseContent = await response.Content.ReadAsStringAsync();
 
             if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
@@ -63,10 +57,9 @@ namespace Service.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                // נסה לנתח את תוכן התגובה לקבלת פרטים מדויקים יותר
                 try
                 {
-                    var errorDoc = JsonDocument.Parse(responseContent);
+                    using var errorDoc = JsonDocument.Parse(responseContent);
                     if (errorDoc.RootElement.TryGetProperty("error", out var error))
                     {
                         var code = error.GetProperty("code").GetString() ?? "קוד שגיאה לא ידוע";
@@ -75,7 +68,6 @@ namespace Service.Services
                 }
                 catch
                 {
-                    // אם לא מצליחים לנתח JSON
                     return $"שגיאה: קוד סטטוס {((int)response.StatusCode)} - {response.ReasonPhrase}";
                 }
             }
@@ -90,4 +82,4 @@ namespace Service.Services
             return content ?? "לא נמצאו הוראות";
         }
     }
-    }
+}

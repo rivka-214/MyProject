@@ -10,11 +10,11 @@ namespace MyProject.Controllers
     [Authorize]
     public class FirstAidController : ControllerBase
     {
-        private readonly FirstAidAiService _firstAidService;
+        private readonly OpenAiService _openAiService;
 
-        public FirstAidController(FirstAidAiService firstAidService)
+        public FirstAidController(OpenAiService openAiService)
         {
-            _firstAidService = firstAidService;
+            _openAiService = openAiService;
         }
 
         [HttpPost("ai")]
@@ -23,9 +23,8 @@ namespace MyProject.Controllers
             if (string.IsNullOrWhiteSpace(description))
                 return BadRequest("Description is required");
 
-            var result = await _firstAidService.GetFirstAidInstructionsAsync(description);
+            var result = await _openAiService.GetFirstAidInstructionsAsync(description);
             return Ok(result);
         }
     }
-
 }
