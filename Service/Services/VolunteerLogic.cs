@@ -96,7 +96,7 @@ namespace Service.Services
         public async Task<List<CallsDto>> GetCallsByStatus(string status)
         {
             var calls = (await callsRepo.GetAll())
-                .Where(c => c.Status == status)
+                .Where(c => c.Status.Equals(status, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
             return mapper.Map<List<CallsDto>>(calls);
