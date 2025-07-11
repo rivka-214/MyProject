@@ -153,7 +153,7 @@ namespace Service.Services
                 throw new System.Exception("קריאה לא נמצאה");
 
             var volunteersInfo = await _volunteerCallLogic.GetCallVolunteersInfo(id);
-            return $"סטטוס: {call.Status}, מידע מתנדבים: {volunteersInfo.StatusMessage}";
+            return $"סטטוס: {call.Status}";
         }
         public async Task<CallsDto> AddCallAsync(CallsDto call, IFormFile file)
         {
