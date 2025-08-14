@@ -60,6 +60,12 @@ namespace Mock.Migrations
                     b.Property<int?>("UrgencyLevel")
                         .HasColumnType("int");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("numVolanteer")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
@@ -159,7 +165,7 @@ namespace Mock.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LastNAme")
+                    b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -168,8 +174,10 @@ namespace Mock.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("password")
                         .IsRequired()
@@ -177,7 +185,16 @@ namespace Mock.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("VolunteersDb");
+                    b.ToTable("UsersDb");
+                });
+
+            modelBuilder.Entity("Reposetory.Entities.Calls", b =>
+                {
+                    b.HasOne("Repository.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Reposetory.Entities.VolunteerCalls", b =>

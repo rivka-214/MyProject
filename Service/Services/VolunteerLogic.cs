@@ -11,6 +11,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Net.WebSockets;
+using System.Collections.Concurrent;
+using System.Threading;
+using Microsoft.AspNetCore.SignalR; // הוסף למעלה
+using Service.Services; // עבור NotificationHub
 
 namespace Service.Services
 {
@@ -22,16 +27,22 @@ namespace Service.Services
         private readonly IRepository<Calls> callsRepo;
         private readonly IMapper mapper;
 
+        private readonly ConcurrentDictionary<int, WebSocket> volunteerSockets = new();
+        private readonly IHubContext<NotificationHub> _hubContext; // חדש
+
         public VolunteerLogic(
             IVolunteer volunteer,
             IRepository<Volunteers> volunteerRepo,
             IRepository<Calls> callsRepo,
-            IMapper mapper)
+            IMapper mapper,
+            IHubContext<NotificationHub> hubContext // חדש
+        )
         {
             IvolunteerRepo = volunteer;
             this.volunteerRepo = volunteerRepo;
             this.callsRepo = callsRepo;
             this.mapper = mapper;
+            _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext)); // חדש
         }
 
         public async Task<VolunteersDto> RegisterVolunteerWithLocation(VolunteersDto dto)
@@ -120,6 +131,21 @@ namespace Service.Services
                 .Select(x => x.Volunteer)
                 .ToList();
 
+            // שליחת הודעה לכל מתנדב שמוקצה
+            foreach (var volunteer in sorted)
+            {
+                var callDetails = new
+                {
+                    CallId = callId,
+                    LocationX = locationX,
+                    LocationY = locationY
+                    // תוכל להוסיף כאן פרטים נוספים אם תרצה
+                };
+
+                await _hubContext.Clients.User(volunteer.Id.ToString())
+                    .SendAsync("CallAssigned", callDetails);
+            }
+
             return mapper.Map<List<VolunteersDto>>(sorted);
         }
 
@@ -186,6 +212,14 @@ namespace Service.Services
             return (0, 0); // fallback
         }
 
+        public async Task NotifyVolunteerAssigned(int volunteerId, string message)
+        {
+            if (volunteerSockets.TryGetValue(volunteerId, out var ws) && ws.State == WebSocketState.Open)
+            {
+                var bytes = System.Text.Encoding.UTF8.GetBytes(message);
+                await ws.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+            }
+        }
 
         private class NominatimResult
         {

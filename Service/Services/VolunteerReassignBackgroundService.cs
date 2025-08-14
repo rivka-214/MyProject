@@ -10,7 +10,7 @@ namespace Service.Services
     public class VolunteerReassignBackgroundService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly TimeSpan _interval = TimeSpan.FromMinutes(1); // כל 1 דקות
+        private readonly TimeSpan _interval = TimeSpan.FromMinutes(0.5); // כל 1 דקות
 
         public VolunteerReassignBackgroundService(IServiceProvider serviceProvider)
         {
@@ -27,7 +27,7 @@ namespace Service.Services
 
                     try
                     {
-                        await volunteerCallLogic.CheckAndReassignVolunteers(); // את זה תשאירי public בתוך IVolunteersCallLogic
+                        await volunteerCallLogic.CheckAndReassignVolunteers();
                     }
                     catch (Exception ex)
                     {

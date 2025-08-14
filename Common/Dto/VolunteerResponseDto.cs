@@ -2,12 +2,7 @@
 
 namespace Common.Dto
 {
-    public class VolunteerResponseDto
-    {
-        public int CallId { get; set; }
-        public int VolunteerId { get; set; }
-        public string Response { get; set; } // "going", "cant", "arrived", "finished"
-    }
+   
 
     public class UpdateVolunteerStatusDto
     {

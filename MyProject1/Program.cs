@@ -1,4 +1,4 @@
-﻿using AiFirstAidApi.Services;
+﻿
 using AutoMapper;
 using Common.Dto;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,11 +12,13 @@ using Repository.Repositories;
 using Service.Interfaces;
 using Service.Services;
 using System.Text;
+using System.Net.WebSockets;
+using System.Collections.Concurrent;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ✅ Load configuration
-builder.Configuration
+builder.Configuration   
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
@@ -26,6 +28,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddHttpClient();
+
 // ✅ Swagger + JWT support
 builder.Services.AddSwaggerGen(option =>
 {
@@ -67,7 +70,8 @@ builder.Services.AddCors(options =>
             "http://localhost:3001",
             "http://localhost:3002")
         .AllowAnyHeader()
-        .AllowAnyMethod();
+        .AllowAnyMethod()
+        .AllowCredentials(); // ← הוסף את זה!
     });
 });
 
@@ -85,6 +89,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -107,13 +125,27 @@ builder.Services.AddControllers()
 builder.Services.AddScoped<VolunteersCallService>();
 builder.Services.AddScoped<IVolunteersCallLogic>(sp => sp.GetRequiredService<VolunteersCallService>());
 builder.Services.AddScoped<IService<VolunteerCallsDto>>(sp => sp.GetRequiredService<VolunteersCallService>());
-builder.Services.AddHttpClient<OpenAiService>();
+//builder.Services.AddHttpClient<IAssistantService, OpenAIAssistantService>();
+builder.Services.AddHttpClient<IAssistantService, GeminiAssistantService>();
+
+
 // ✅ Resolve circular dependency
 builder.Services.AddScoped<Func<IVolunteersCallLogic>>(sp => () => sp.GetRequiredService<IVolunteersCallLogic>());
 
 // ✅ Add SignalR (optional)
+// הוסף בתוך builder.Services.AddSignalR():
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true; // לdebug
+});
+
+
+
+
+
+
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<FirstAidService>();
+
 // ✅ General services extension
 builder.Services.AddServices(); // ודאי שהשיטה קיימת
 
@@ -129,12 +161,48 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRouting(); // ✅ תיקון: חובה לפני UseEndpoints
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
-// app.MapHub<VolunteersHub>("/volunteersHub"); // אם תשתמשי ב-SignalR
+
+app.UseWebSockets();
+
+var volunteerSockets = new ConcurrentDictionary<int, WebSocket>();
+
+app.Map("/ws", async context =>
+{
+    if (context.WebSockets.IsWebSocketRequest)
+    {
+        var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+        var volunteerIdStr = context.Request.Query["volunteerId"];
+        if (int.TryParse(volunteerIdStr, out int volunteerId))
+        {
+            volunteerSockets[volunteerId] = webSocket;
+            var buffer = new byte[1024 * 4];
+            while (webSocket.State == WebSocketState.Open)
+            {
+                var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    volunteerSockets.TryRemove(volunteerId, out _);
+                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                }
+            }
+        }
+    }
+    else
+    {
+        context.Response.StatusCode = 400;
+    }
+});
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<NotificationHub>("/notificationHub");
+});
 
 app.Run();

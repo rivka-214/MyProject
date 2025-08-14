@@ -11,6 +11,8 @@ namespace Common.Dto
     {
         public int Id { get; set; } // מפתח ראשי
 
+        public int UserId { get; set; } // מזהה משתמש נוסף
+
         [Required(ErrorMessage = "יש להזין שם פרטי")]
         [StringLength(50, ErrorMessage = "שם פרטי יכול להכיל עד 50 תווים")]
         public string FirstName { get; set; }

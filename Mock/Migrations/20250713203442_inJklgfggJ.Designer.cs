@@ -12,8 +12,8 @@ using Mock;
 namespace Mock.Migrations
 {
     [DbContext(typeof(Database))]
-    [Migration("20250619204426_HISTORY")]
-    partial class HISTORY
+    [Migration("20250713203442_inJklgfggJ")]
+    partial class inJklgfggJ
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,9 @@ namespace Mock.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -60,10 +63,15 @@ namespace Mock.Migrations
                     b.Property<int?>("UrgencyLevel")
                         .HasColumnType("int");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.Property<int>("numVolanteer")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("CallsDb");
                 });
@@ -79,11 +87,14 @@ namespace Mock.Migrations
                     b.Property<int>("CallsId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("TreatmentDateTime")
+                    b.Property<DateTime?>("ResponseTime")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("VolunteerId")
                         .HasColumnType("int");
+
+                    b.Property<string>("VolunteerStatus")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -157,7 +168,7 @@ namespace Mock.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LastNAme")
+                    b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -166,8 +177,10 @@ namespace Mock.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("password")
                         .IsRequired()
@@ -176,6 +189,15 @@ namespace Mock.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UsersDb");
+                });
+
+            modelBuilder.Entity("Reposetory.Entities.Calls", b =>
+                {
+                    b.HasOne("Repository.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Reposetory.Entities.VolunteerCalls", b =>

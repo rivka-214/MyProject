@@ -2,7 +2,6 @@
 using Common.Dto;
 using Reposetory.Entities;
 using Repository.Entities;
-
 using Repository.Interfacese;
 using Repository.Repositories;
 using Service.Interfaces;
@@ -10,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
+using Service.Services; // עבור NotificationHub
 
 namespace Service.Services
 {
@@ -21,6 +22,7 @@ namespace Service.Services
         private readonly IMapper _mapper;
         private readonly IVolunteerLogic _volunteerLogic;
         private readonly VolunteersCallsRepository _volunteerCallsRepository;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
         private static readonly string[] ValidStatuses = { "notified", "going", "cant", "arrived", "finished" };
         private static readonly string[] ActiveStatuses = { "going", "arrived" };
@@ -29,13 +31,16 @@ namespace Service.Services
             IRepository<VolunteerCalls> repository,
             IRepository<Calls> callsRepository,
             IMapper mapper,
-            IVolunteerLogic volunteerLogic)
+            IVolunteerLogic volunteerLogic,
+            IHubContext<NotificationHub> hubContext // הוסף כאן
+        )
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _callsRepository = callsRepository ?? throw new ArgumentNullException(nameof(callsRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _volunteerLogic = volunteerLogic ?? throw new ArgumentNullException(nameof(volunteerLogic));
             _volunteerCallsRepository = repository as VolunteersCallsRepository ?? throw new ArgumentException("Repository must be of type VolunteersCallsRepository");
+            _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext)); // אתחול
         }
 
         #region IService Implementation
@@ -102,6 +107,24 @@ namespace Service.Services
                 };
 
                 await AddItemAsync(volunteerCall);
+
+                // שליחת הודעה ל-Client של המתנדב
+                var callDetailsForVolunteer = new
+                {
+                    CallId = call.Id,
+                    Description = call.Description,
+                    LocationX = call.LocationX,
+                    LocationY = call.LocationY,
+                    image= call.ImageUrl,
+                    Date = call.Date,
+                    Status = call.Status,
+
+                    CallerName = call.User?.FirstName + " " + call.User?.LastName ?? "לא ידוע",
+
+                };
+
+                await _hubContext.Clients.User(volunteer.Id.ToString())
+                    .SendAsync("CallAssigned", callDetailsForVolunteer);
             }
         }
       
